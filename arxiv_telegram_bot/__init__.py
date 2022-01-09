@@ -1,11 +1,20 @@
 from decouple import config
-import requests
-from bs4 import BeautifulSoup
-import lxml
+import arxiv
+from loguru import logger
 
 __version__ = "0.1.0"
-response = requests.get(
-    "https://export.arxiv.org/api/query?search_query=cat:cs.CV+OR+cat:cs.LG+OR+cat:cs.CL+OR+cat:cs.AI+OR+cat:cs.NE+OR+cat:cs.RO"
+
+query_catalogues = ["cs.CV", "cs.LG", "cs.CL", "cs.AI", "cs.NE", "cs.RO"]
+query_string = " OR ".join(query_catalogues)
+
+search = arxiv.Search(
+    query=query_string,
+    max_results=100,
+    sort_by=arxiv.SortCriterion.SubmittedDate,
+    sort_order=arxiv.SortOrder.Descending,
 )
-xml_data = BeautifulSoup(response.text, "lxml")
-print(xml_data.find_all("entry")[0])
+
+for result in search.results():
+    print(
+        f"{result.title} - {result.published}\n{result.categories}\n{result.summary}\n\n"
+    )
