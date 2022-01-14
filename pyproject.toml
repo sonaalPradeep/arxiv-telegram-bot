@@ -11,6 +11,7 @@ python-telegram-bot = "^13.10"
 loguru = "^0.5.3"
 python-decouple = "^3.5"
 arxiv = "^1.4.2"
+python-dotenv = "^0.19.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
