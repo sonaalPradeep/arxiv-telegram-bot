@@ -16,7 +16,7 @@ def fetch_latest_paper():
     )
 
     result = search.results().__next__()
-    return result.title, result.published, result.summary
+    return result.title, str(result.published), result.summary
 
 
 if __name__ == "__main__":

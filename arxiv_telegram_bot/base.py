@@ -11,11 +11,13 @@ All Imports Necessary for Arxiv Bot
 # - Standard Library Imnports
 import logging
 import os
+import re
 
 # - DotENV
 import dotenv
 
 # - Telegram Imports
+import telegram
 from telegram import Update
 
 # - Telegram Extended Imports
@@ -69,8 +71,15 @@ def uid(update: Update, context: CallbackContext):
 def fetch(update: Update, context: CallbackContext):
     """Fetch the latest papers"""
     title, date, summary = fetch_latest_paper()
-    message_to_send = f"{title}\n{date}\n\n{summary}"
-    update.message.reply_text(message_to_send)
+    escaper = re.compile(r"(\W)")
+    title = escaper.sub(r"\\\1", title)
+    date = escaper.sub(r"\\\1", date)
+    summary = escaper.sub(r"\\\1", summary)
+    message_to_send = f"*{title}*\n_{date}_\n\n{summary}"
+    message_to_send.replace("-", "\\-")
+    update.message.reply_text(
+        message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2
+    )
 
 
 # - Error Handler
