@@ -26,6 +26,9 @@ from telegram.ext import (
     CallbackContext,
 )
 
+# - Custom Functions
+from arxiv_telegram_bot.functions.fetch import fetch_latest_paper
+
 
 # -- SETUP
 
@@ -61,9 +64,13 @@ def uid(update: Update, context: CallbackContext):
     print(message_to_send)
     update.message.reply_text(message_to_send)
 
+
 # - 'fetch' Command Handler
 def fetch(update: Update, context: CallbackContext):
     """Fetch the latest papers"""
+    title, date, summary = fetch_latest_paper()
+    message_to_send = f"{title}\n{date}\n\n{summary}"
+    update.message.reply_text(message_to_send)
 
 
 # - Error Handler
@@ -87,6 +94,9 @@ def main():
 
     # Test UID Ping
     dp.add_handler(CommandHandler("uid", uid))
+
+    # Send the latest paper
+    dp.add_handler(CommandHandler("latest", fetch))
 
     # log all errors
     dp.add_error_handler(error)
