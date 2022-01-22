@@ -61,6 +61,10 @@ def uid(update: Update, context: CallbackContext):
     print(message_to_send)
     update.message.reply_text(message_to_send)
 
+# - 'fetch' Command Handler
+def fetch(update: Update, context: CallbackContext):
+    """Fetch the latest papers"""
+
 
 # - Error Handler
 def error(update: Update, context: CallbackContext):
