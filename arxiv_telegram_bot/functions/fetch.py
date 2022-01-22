@@ -18,5 +18,6 @@ def fetch_latest_paper():
     result = search.results().__next__()
     return result.title, result.published, result.summary
 
+
 if __name__ == "__main__":
     print(fetch_latest_paper())
