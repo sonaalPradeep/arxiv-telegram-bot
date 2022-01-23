@@ -55,7 +55,6 @@ TOKEN = dotenv.get_key(".env", "TOKEN")
 # - 'start' Command Handler
 def start(update: Update, context: CallbackContext):
     """Send a message when the command 'start' is issued."""
-    print(context._user_id_and_data[0])
     update.message.reply_text("Hi! Your userid")
 
 
