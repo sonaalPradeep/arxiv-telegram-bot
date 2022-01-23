@@ -4,7 +4,9 @@
 import arxiv
 import re
 
-query_catalogues = ["cs.CV", "cs.LG", "cs.CL", "cs.AI", "cs.NE", "cs.RO"]
+from arxiv_telegram_bot.models.category.computer_science import ComputerScienceCategory
+
+query_catalogues = list(map(lambda x: x.get_code(), list(ComputerScienceCategory)))
 query_string = " OR ".join(query_catalogues)
 
 
