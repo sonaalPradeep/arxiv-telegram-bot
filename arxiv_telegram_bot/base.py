@@ -11,7 +11,6 @@ All Imports Necessary for Arxiv Bot
 # - Standard Library Imnports
 import logging
 import os
-import re
 
 # - DotENV
 import dotenv
@@ -69,13 +68,15 @@ def uid(update: Update, context: CallbackContext):
 # - 'fetch' Command Handler
 def fetch(update: Update, context: CallbackContext):
     """Fetch the latest papers"""
-    title, date, summary = fetch_latest_paper()
-    escaper = re.compile(r"(\W)")
-    title = escaper.sub(r"\\\1", title)
-    date = escaper.sub(r"\\\1", date)
-    summary = escaper.sub(r"\\\1", summary)
-    message_to_send = f"*{title}*\n_{date}_\n\n{summary}"
-    message_to_send.replace("-", "\\-")
+    title, date, summary, categories, abs_url, pdf_url = fetch_latest_paper()
+    message_to_send = f"""
+*{title}* \(_{categories}_\)\n
+Publication Date: _{date}_\n\n
+{summary}\n
+    
+[Click here to open the Arxiv page]({abs_url})
+[Click here to open the PDF]({pdf_url})"""
+
     update.message.reply_text(
         message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2
     )
