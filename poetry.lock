@@ -448,8 +448,8 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = "3.8.1"
-content-hash = "3625b2b8f5f7870e1690439d2dca4c805765123a24a5f2556bc43b7a7b4c851d"
+python-versions = "3.8.12"
+content-hash = "33a215d506c493b696b390a88762839336ec5ee08080245ad8dd9b4ac73e853f"
 
 [metadata.files]
 apscheduler = [
