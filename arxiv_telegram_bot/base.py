@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 PORT = int(os.environ.get("PORT", 5000))
 
 # - Application Token
-TOKEN = dotenv.get_key(".env", "TOKEN")
+TOKEN = os.environ.get("TOKEN")
 
 
 # -- COMMAND HANDLERS
