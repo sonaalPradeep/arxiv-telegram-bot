@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 # -- CONSTANTS
 
 # - Application Port
-PORT = int(os.environ.get("PORT", 5000))
+PORT = int(os.environ.get("PORT", 8443))
 
 # - Application Token
 TOKEN = os.environ.get("TOKEN")
@@ -113,9 +113,12 @@ def main():
     dp.add_error_handler(error)
 
     # Start the bot
-    updater.start_webhook(listen="0.0.0.0", port=int(PORT), url_path=TOKEN)
-
-    updater.bot.setWebhook(f"{HEROKU_URL}/{TOKEN}")
+    updater.start_webhook(
+        listen="0.0.0.0",
+        port=int(PORT),
+        url_path=TOKEN,
+        webhook_url=f"{HEROKU_URL}/{TOKEN}",
+    )
 
     # Run bot until stopped
     updater.idle()
