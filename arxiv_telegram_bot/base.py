@@ -70,6 +70,10 @@ def uid(update: Update, context: CallbackContext):
 # - 'fetch' Command Handler
 def fetch(update: Update, context: CallbackContext):
     """Fetch the latest papers"""
+    context.bot.send_chat_action(
+        chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING
+    )
+
     title, date, summary, categories, abs_url, pdf_url = fetch_latest_paper()
     message_to_send = f"""
 *{title}* \(_{categories}_\)\n
