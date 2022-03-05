@@ -25,9 +25,15 @@ from telegram.ext import (
     CommandHandler,
     Dispatcher,
     CallbackContext,
+    MessageHandler,
+    Filters,
 )
 
 # - Custom Functions
+from arxiv_telegram_bot.models.category.computer_science import ComputerScienceCategory
+from arxiv_telegram_bot.models.category.electrical_engineering_and_systems_science import (
+    ElectricalEngineeringAndSystemsScience,
+)
 from arxiv_telegram_bot.functions.fetch import fetch_latest_paper
 
 
@@ -50,7 +56,7 @@ TOKEN = os.environ.get("TOKEN")
 
 HEROKU_URL = os.environ.get("HEROKU_URL")
 
-
+CHOOSE_CATEGORY, CHOOSE_TOPIC, FALLBACK = range(3)
 # -- COMMAND HANDLERS
 
 # - 'start' Command Handler
@@ -84,6 +90,114 @@ Publication Date: _{date}_\n\n
     )
 
 
+def preferences_entry(update: Update, context: CallbackContext):
+    """Gather subject preferences of user"""
+
+    user_preferences = context.user_data.get("CURRENT_PREFERENCES")
+
+    if user_preferences is None:
+        reply_text = f"Hey there! Looks like you don't have any preferences set. Let me help you out"
+    else:
+        reply_text = f"Welcome back! Looks like we already have your preferences: {user_preferences}"
+
+    update.message.reply_text(
+        reply_text,
+        reply_markup=telegram.ReplyKeyboardMarkup([["Choose Category"], ["Exit"]]),
+    )
+
+    return CHOOSE_CATEGORY
+
+
+def pick_categories(update: Update, context: CallbackContext):
+    # TODO: Remove hardcoding of these categories
+    catalogues = [
+        ["Computer Science"],
+        ["Electrical Engineering and Systems Science"],
+        ["Exit"],
+    ]
+    update.message.reply_text(
+        "Please choose your category",
+        reply_markup=telegram.ReplyKeyboardMarkup(
+            catalogues, input_field_placeholder="Category", one_time_keyboard=True
+        ),
+    )
+
+    return CHOOSE_TOPIC
+
+
+def pick_topic(update: Update, context: CallbackContext):
+    response = update.message.text
+    context.user_data["CURRENT_CATEGORY"] = response
+
+    # TODO: Remove hardcoding of these categories
+    if response == "Computer Science":
+        catalogues = list(map(lambda x: [x.get_name()], list(ComputerScienceCategory)))
+    elif response == "Electrical Engineering and Systems Science":
+        catalogues = list(
+            map(lambda x: [x.get_name()], list(ElectricalEngineeringAndSystemsScience))
+        )
+    else:
+        catalogues = []
+
+    catalogues += [["Go back"]]
+    update.message.reply_text(
+        "Please choose your topic",
+        reply_markup=telegram.ReplyKeyboardMarkup(
+            catalogues, input_field_placeholder="Topic", one_time_keyboard=True
+        ),
+    )
+
+    return CHOOSE_TOPIC
+
+
+def pick_topic_again(update: Update, context: CallbackContext):
+    category = context.user_data["CURRENT_CATEGORY"]
+    response = update.message.text
+
+    if context.user_data.get("CURRENT_PREFERENCES") is None:
+        context.user_data["CURRENT_PREFERENCES"] = [response]
+    else:
+        if response not in context.user_data.get("CURRENT_PREFERENCES"):
+            context.user_data.get("CURRENT_PREFERENCES").append(response)
+        else:
+            context.user_data.get("CURRENT_PREFERENCES").remove(response)
+
+    if category == "Computer Science":
+        catalogues = list(map(lambda x: [x.get_name()], list(ComputerScienceCategory)))
+    elif category == "Electrical Engineering and Systems Science":
+        catalogues = list(
+            map(lambda x: [x.get_name()], list(ElectricalEngineeringAndSystemsScience))
+        )
+    else:
+        catalogues = []
+
+    catalogues += [["Go back"]]
+    update.message.reply_text(
+        "Please choose your topic",
+        reply_markup=telegram.ReplyKeyboardMarkup(
+            catalogues, input_field_placeholder="Topic", one_time_keyboard=True
+        ),
+    )
+
+    return CHOOSE_TOPIC
+
+
+def preferences_done(update: Update, context: CallbackContext):
+    user_preferences = context.user_data.get("CURRENT_PREFERENCES")
+
+    if user_preferences is None:
+        reply_text = "Ohh... We see that you've cleared your preferences"
+    else:
+        reply_text = (
+            f"Excellent choice! Your preferences now are {', '.join(user_preferences)}"
+        )
+
+    update.message.reply_text(reply_text, reply_markup=telegram.ReplyKeyboardRemove())
+
+    # TODO: Make necessary imports to simply these calls
+    return telegram.ext.ConversationHandler.END
+
+
 # - Error Handler
 def error(update: Update, context: CallbackContext):
     logger.warning("Update %s caused error %s", update, context.error)
@@ -109,16 +223,56 @@ def main():
     # Send the latest paper
     dp.add_handler(CommandHandler("latest", fetch))
 
+    # TODO: Handler must be able to ignore commands
+    # TODO: Verify if callback works
+    preference_handler = telegram.ext.ConversationHandler(
+        entry_points=[CommandHandler("preferences", preferences_entry)],
+        states={
+            CHOOSE_CATEGORY: [
+                MessageHandler(
+                    filters=Filters.regex("^Choose Category$"), callback=pick_categories
+                ),
+                MessageHandler(
+                    filters=Filters.regex("^Exit$"), callback=preferences_done
+                ),
+            ],
+            CHOOSE_TOPIC: [
+                MessageHandler(
+                    filters=Filters.regex(
+                        "^(Computer Science|Electrical Engineering and Systems Science)$"
+                    ),
+                    callback=pick_topic,
+                ),
+                MessageHandler(
+                    filters=Filters.text & ~(Filters.regex("^(Go back|Exit)$")),
+                    callback=pick_topic_again,
+                ),
+                MessageHandler(
+                    filters=Filters.regex("^Go back$"), callback=pick_categories
+                ),
+                MessageHandler(
+                    filters=Filters.regex("^Exit$"), callback=preferences_done
+                ),
+            ],
+        },
+        fallbacks=[CommandHandler("done", preferences_done)],
+    )
+
+    dp.add_handler(preference_handler)
+
     # log all errors
     dp.add_error_handler(error)
 
+    # FIXME: Change this to wehbook before deployment
+
     # Start the bot
-    updater.start_webhook(
-        listen="0.0.0.0",
-        port=int(PORT),
-        url_path=TOKEN,
-        webhook_url=f"{HEROKU_URL}/{TOKEN}",
-    )
+    # updater.start_webhook(
+    #     listen="0.0.0.0",
+    #     port=int(PORT),
+    #     url_path=TOKEN,
+    #     webhook_url=f"{HEROKU_URL}/{TOKEN}",
+    # )
+    updater.start_polling()
 
     # Run bot until stopped
     updater.idle()
