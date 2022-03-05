@@ -3,9 +3,9 @@ from enum import Enum
 
 class ElectricalEngineeringAndSystemsScience(dict, Enum):
     """
-    # Computer Science Category
+    # Electrical Engineering and Systems Science Category
 
-    This enumerator holds all categories required for Computer Science Categories.
+    This enumerator holds all categories required for Electrical Engineering and Systems Science Categories.
     """
 
     # Name of the category

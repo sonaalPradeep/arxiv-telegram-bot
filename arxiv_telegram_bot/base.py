@@ -8,7 +8,7 @@ All Imports Necessary for Arxiv Bot
 """
 
 # -- IMPORTS: LIBRARIES
-# - Standard Library Imnports
+# - Standard Library Imports
 import logging
 import os
 
