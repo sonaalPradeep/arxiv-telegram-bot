@@ -95,7 +95,7 @@ def preferences_entry(update: Update, context: CallbackContext):
 
     user_preferences = context.user_data.get("CURRENT_PREFERENCES")
 
-    if user_preferences is None:
+    if user_preferences is None or len(user_preferences) == 0:
         reply_text = f"Hey there! Looks like you don't have any preferences set. Let me help you out"
     else:
         reply_text = f"Welcome back! Looks like we already have your preferences: {user_preferences}"
@@ -129,6 +129,12 @@ def pick_topic(update: Update, context: CallbackContext):
     response = update.message.text
     context.user_data["CURRENT_CATEGORY"] = response
 
+    if context.user_data.get("CURRENT_PREFERENCES") is None:
+       context.user_data["CURRENT_PREFERENCES"] = {}
+
+    if response not in context.user_data["CURRENT_PREFERENCES"]:
+        context.user_data["CURRENT_PREFERENCES"][response] = set([])
+
     # TODO: Remove hardcoding of these categories
     if response == "Computer Science":
         catalogues = list(map(lambda x: [x.get_name()], list(ComputerScienceCategory)))
@@ -154,13 +160,14 @@ def pick_topic_again(update: Update, context: CallbackContext):
     category = context.user_data["CURRENT_CATEGORY"]
     response = update.message.text
 
-    if context.user_data.get("CURRENT_PREFERENCES") is None:
-        context.user_data["CURRENT_PREFERENCES"] = [response]
+    if response not in context.user_data.get("CURRENT_PREFERENCES").get(category):
+        context.user_data["CURRENT_PREFERENCES"][category].add(response)
     else:
-        if response not in context.user_data.get("CURRENT_PREFERENCES"):
-            context.user_data.get("CURRENT_PREFERENCES").append(response)
-        else:
-            context.user_data.get("CURRENT_PREFERENCES").remove(response)
+        context.user_data["CURRENT_PREFERENCES"][category].remove(response)
+
+        # TODO: This checks needs to be done while printing
+        if len(context.user_data["CURRENT_PREFERENCES"][category]) == 0:
+            del context.user_data["CURRENT_PREFERENCES"][category]
 
     if category == "Computer Science":
         catalogues = list(map(lambda x: [x.get_name()], list(ComputerScienceCategory)))
@@ -185,11 +192,11 @@ def pick_topic_again(update: Update, context: CallbackContext):
 def preferences_done(update: Update, context: CallbackContext):
     user_preferences = context.user_data.get("CURRENT_PREFERENCES")
 
-    if user_preferences is None:
+    if user_preferences is None or len(user_preferences) == 0:
         reply_text = "Ohh... We see that you've cleared your preferences"
     else:
         reply_text = (
-            f"Excellent choice! Your preferences now are {', '.join(user_preferences)}"
+            f"Excellent choice! Your preferences now are {user_preferences}"
         )
 
     update.message.reply_text(reply_text, reply_markup=telegram.ReplyKeyboardRemove())
