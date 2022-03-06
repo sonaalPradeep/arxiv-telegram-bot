@@ -117,12 +117,12 @@ def main():
     dp.add_error_handler(error)
 
     # Start the bot
-    if os.environ.get("ENV")=="HEROKU":
+    if os.environ.get("ENV") == "HEROKU":
         updater.start_webhook(
             listen="0.0.0.0",
             port=int(PORT),
             url_path=TOKEN,
-            webhook_url=f"{HEROKU_URL}/{TOKEN}",
+            webhook_url=f"{HEROKU_URL}/{TOKEN}"
         )
     else:
         updater.start_polling()
