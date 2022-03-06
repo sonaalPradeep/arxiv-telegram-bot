@@ -122,7 +122,7 @@ def main():
             listen="0.0.0.0",
             port=int(PORT),
             url_path=TOKEN,
-            webhook_url=f"{HEROKU_URL}/{TOKEN}"
+            webhook_url=f"{HEROKU_URL}/{TOKEN}",
         )
     else:
         updater.start_polling()
