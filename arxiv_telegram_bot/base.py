@@ -118,7 +118,7 @@ def pick_categories(update: Update, context: CallbackContext):
     update.message.reply_text(
         "Please choose your category",
         reply_markup=telegram.ReplyKeyboardMarkup(
-            catalogues, input_field_placeholder="Category", one_time_keyboard=True
+            catalogues, input_field_placeholder="Category"
         ),
     )
 
@@ -146,7 +146,7 @@ def pick_topic(update: Update, context: CallbackContext):
     update.message.reply_text(
         "Please choose your topic",
         reply_markup=telegram.ReplyKeyboardMarkup(
-            catalogues, input_field_placeholder="Topic", one_time_keyboard=True
+            catalogues, input_field_placeholder="Topic"
         ),
     )
 
@@ -157,12 +157,16 @@ def pick_topic_again(update: Update, context: CallbackContext):
     category = context.user_data["CURRENT_CATEGORY"]
     response = update.message.text
 
+    status = 0
+
     if category not in context.user_data["CURRENT_PREFERENCES"]:
         context.user_data["CURRENT_PREFERENCES"][category] = set([])
 
     if response not in context.user_data.get("CURRENT_PREFERENCES").get(category):
+        status = 1
         context.user_data["CURRENT_PREFERENCES"][category].add(response)
     else:
+        status = -1
         context.user_data["CURRENT_PREFERENCES"][category].remove(response)
 
         # TODO: This checks needs to be done while printing
@@ -178,11 +182,18 @@ def pick_topic_again(update: Update, context: CallbackContext):
     else:
         catalogues = []
 
+    if status == 1:
+        reply_text = f"Added {response} to your preferences"
+    elif status == -1:
+        reply_text = f"Removed {response} to your preferences"
+    else:
+        reply_text = "Please choose your topic"
+
     catalogues += [["Go back"]]
     update.message.reply_text(
-        "Please choose your topic",
+        reply_text,
         reply_markup=telegram.ReplyKeyboardMarkup(
-            catalogues, input_field_placeholder="Topic", one_time_keyboard=True
+            catalogues, input_field_placeholder="Topic"
         ),
     )
 
