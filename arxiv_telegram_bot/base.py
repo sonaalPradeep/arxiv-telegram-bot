@@ -76,6 +76,10 @@ def uid(update: Update, context: CallbackContext):
 # - 'fetch' Command Handler
 def fetch(update: Update, context: CallbackContext):
     """Fetch the latest papers"""
+    context.bot.send_chat_action(
+        chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING
+    )
+
     title, date, summary, categories, abs_url, pdf_url = fetch_latest_paper()
     message_to_send = f"""
 *{title}* \(_{categories}_\)\n
@@ -275,13 +279,15 @@ def main():
     # FIXME: Change this to wehbook before deployment
 
     # Start the bot
-    # updater.start_webhook(
-    #     listen="0.0.0.0",
-    #     port=int(PORT),
-    #     url_path=TOKEN,
-    #     webhook_url=f"{HEROKU_URL}/{TOKEN}",
-    # )
-    updater.start_polling()
+    if os.environ.get("ENV") == "HEROKU":
+        updater.start_webhook(
+            listen="0.0.0.0",
+            port=int(PORT),
+            url_path=TOKEN,
+            webhook_url=f"{HEROKU_URL}/{TOKEN}",
+        )
+    else:
+        updater.start_polling()
 
     # Run bot until stopped
     updater.idle()
