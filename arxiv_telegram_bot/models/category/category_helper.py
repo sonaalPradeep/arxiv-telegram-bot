@@ -19,7 +19,6 @@ class CategoryHelper:
         self.category_enum_mapping = dict(zip(self.categories_list, self.enum_list))
         self.name_code_mapping = {}
 
-        print(self.category_enum_mapping)
         for category, enum in self.category_enum_mapping.items():
             topic_code_mapping = {x.get_name(): x.get_code() for x in list(enum)}
             self.name_code_mapping[category] = topic_code_mapping
