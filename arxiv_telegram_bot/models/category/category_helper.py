@@ -25,3 +25,9 @@ class CategoryHelper:
 
     def get_code_from_name(self, category, topic):
         return self.name_code_mapping.get(category).get(topic)
+
+    def get_categories_list(self):
+        return self.categories_list
+
+    def get_enumerate_from_name(self, category):
+        return self.category_enum_mapping.get(category)

@@ -35,6 +35,7 @@ from arxiv_telegram_bot.models.category.electrical_engineering_and_systems_scien
     ElectricalEngineeringAndSystemsScience,
 )
 from arxiv_telegram_bot.functions.fetch import fetch_latest_paper
+from arxiv_telegram_bot.models.category.category_helper import CategoryHelper
 
 
 # -- SETUP
@@ -119,12 +120,10 @@ def preferences_entry(update: Update, context: CallbackContext):
 
 
 def pick_categories(update: Update, context: CallbackContext):
-    # TODO: Remove hardcoding of these categories
-    catalogues = [
-        ["Computer Science"],
-        ["Electrical Engineering and Systems Science"],
-        ["Exit"],
-    ]
+    categories = CategoryHelper()
+    catalogues = [[category] for category in categories.get_categories_list()]
+    catalogues += [["Exit"]]
+
     update.message.reply_text(
         "Please choose your category",
         reply_markup=telegram.ReplyKeyboardMarkup(
@@ -136,21 +135,15 @@ def pick_categories(update: Update, context: CallbackContext):
 
 
 def pick_topic(update: Update, context: CallbackContext):
+    categories = CategoryHelper()
     response = update.message.text
     context.user_data["CURRENT_CATEGORY"] = response
 
     if context.user_data.get("CURRENT_PREFERENCES") is None:
         context.user_data["CURRENT_PREFERENCES"] = {}
 
-    # TODO: Remove hardcoding of these categories
-    if response == "Computer Science":
-        catalogues = list(map(lambda x: [x.get_name()], list(ComputerScienceCategory)))
-    elif response == "Electrical Engineering and Systems Science":
-        catalogues = list(
-            map(lambda x: [x.get_name()], list(ElectricalEngineeringAndSystemsScience))
-        )
-    else:
-        catalogues = []
+    enum_category = categories.get_enumerate_from_name(response)
+    catalogues = list(map(lambda x: [x.get_name()], list(enum_category)))
 
     catalogues += [["Go back"]]
     update.message.reply_text(
@@ -164,6 +157,7 @@ def pick_topic(update: Update, context: CallbackContext):
 
 
 def pick_topic_again(update: Update, context: CallbackContext):
+    categories = CategoryHelper()
     category = context.user_data["CURRENT_CATEGORY"]
     response = update.message.text
 
@@ -177,18 +171,11 @@ def pick_topic_again(update: Update, context: CallbackContext):
         context.user_data["CURRENT_PREFERENCES"][category].remove(response)
         reply_text = f"Removed {response} to your preferences"
 
-        # TODO: This checks needs to be done while printing
         if len(context.user_data["CURRENT_PREFERENCES"][category]) == 0:
             del context.user_data["CURRENT_PREFERENCES"][category]
 
-    if category == "Computer Science":
-        catalogues = list(map(lambda x: [x.get_name()], list(ComputerScienceCategory)))
-    elif category == "Electrical Engineering and Systems Science":
-        catalogues = list(
-            map(lambda x: [x.get_name()], list(ElectricalEngineeringAndSystemsScience))
-        )
-    else:
-        catalogues = []
+    enum_category = categories.get_enumerate_from_name(category)
+    catalogues = list(map(lambda x: [x.get_name()], list(enum_category)))
 
     catalogues += [["Go back"]]
     update.message.reply_text(
@@ -224,6 +211,9 @@ def error(update: Update, context: CallbackContext):
 def main():
     """Start the bot."""
 
+    categories = CategoryHelper()
+    catalogues_filter = "^(" + "|".join(categories.get_categories_list()) + ")$"
+
     # Create Updater and pass it the bot's token
     updater = Updater(TOKEN, use_context=True)
 
@@ -256,7 +246,7 @@ def main():
             CHOOSE_TOPIC: [
                 MessageHandler(
                     filters=Filters.regex(
-                        "^(Computer Science|Electrical Engineering and Systems Science)$"
+                       catalogues_filter
                     ),
                     callback=pick_topic,
                 ),
@@ -279,8 +269,6 @@ def main():
 
     # log all errors
     dp.add_error_handler(error)
-
-    # FIXME: Change this to wehbook before deployment
 
     # Start the bot
     if os.environ.get("ENV") == "HEROKU":
