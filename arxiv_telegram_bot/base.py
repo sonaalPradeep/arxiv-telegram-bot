@@ -39,6 +39,10 @@ from arxiv_telegram_bot.functions.fetch import fetch_latest_paper
 
 # -- SETUP
 
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+)
+
 # - Load DotENV
 dotenv.load_dotenv()
 
@@ -80,7 +84,7 @@ def fetch(update: Update, context: CallbackContext):
         chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING
     )
 
-    title, date, summary, categories, abs_url, pdf_url = fetch_latest_paper()
+    title, date, summary, categories, abs_url, pdf_url = fetch_latest_paper(context.user_data.get("CURRENT_PREFERENCES"))
     message_to_send = f"""
 *{title}* \(_{categories}_\)\n
 Publication Date: _{date}_\n\n
