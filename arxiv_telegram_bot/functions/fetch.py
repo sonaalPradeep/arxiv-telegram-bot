@@ -7,15 +7,20 @@ import re
 from arxiv_telegram_bot.models.category.computer_science import ComputerScienceCategory
 from arxiv_telegram_bot.models.category.category_helper import CategoryHelper
 
+
 def fetch_latest_paper(user_preferences):
     if user_preferences is None or len(user_preferences) == 0:
-        query_catalogues = list(map(lambda x: x.get_code(), list(ComputerScienceCategory)))
+        query_catalogues = list(
+            map(lambda x: x.get_code(), list(ComputerScienceCategory))
+        )
         query_string = " OR ".join(query_catalogues)
     else:
         query_catalogues = []
         helper = CategoryHelper()
         for category, topics in user_preferences.items():
-            query_catalogues.extend([helper.get_code_from_name(category, topic) for topic in topics])
+            query_catalogues.extend(
+                [helper.get_code_from_name(category, topic) for topic in topics]
+            )
 
         query_string = " OR ".join(query_catalogues)
 
