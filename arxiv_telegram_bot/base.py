@@ -245,9 +245,7 @@ def main():
             ],
             CHOOSE_TOPIC: [
                 MessageHandler(
-                    filters=Filters.regex(
-                       catalogues_filter
-                    ),
+                    filters=Filters.regex(catalogues_filter),
                     callback=pick_topic,
                 ),
                 MessageHandler(
