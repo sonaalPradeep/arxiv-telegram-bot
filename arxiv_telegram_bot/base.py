@@ -88,8 +88,9 @@ def fetch(update: Update, context: CallbackContext):
     title, date, summary, categories, abs_url, pdf_url = fetch_latest_paper(
         context.user_data.get("CURRENT_PREFERENCES")
     )
+    summary = summary.replace("\n", "")
     message_to_send = f"""
-*{title}* \(_{categories}_\)\n
+*{title}* `\({categories}\)`\n
 Publication Date: _{date}_\n\n
 {summary}\n
     
