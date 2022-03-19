@@ -27,6 +27,7 @@ from telegram.ext import (
     CallbackContext,
     MessageHandler,
     Filters,
+    ConversationHandler
 )
 
 # - Custom Functions
@@ -199,8 +200,7 @@ def preferences_done(update: Update, context: CallbackContext):
 
     update.message.reply_text(reply_text, reply_markup=telegram.ReplyKeyboardRemove())
 
-    # TODO: Make necessary imports to simply these calls
-    return telegram.ext.ConversationHandler.END
+    return ConversationHandler.END
 
 
 # - Error Handler
@@ -233,7 +233,7 @@ def main():
 
     # TODO: Handler must be able to ignore commands
     # TODO: Verify if callback works
-    preference_handler = telegram.ext.ConversationHandler(
+    preference_handler = ConversationHandler(
         entry_points=[CommandHandler("preferences", preferences_entry)],
         states={
             CHOOSE_CATEGORY: [
