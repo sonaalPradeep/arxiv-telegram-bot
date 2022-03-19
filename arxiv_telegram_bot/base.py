@@ -73,7 +73,7 @@ def main():
     # Send the latest paper
     dp.add_handler(CommandHandler("latest", fetch))
 
-    dp.add_handler(preference_conversation_handler)
+    dp.add_handler(preference_conversation_handler())
 
     # log all errors
     dp.add_error_handler(error)
