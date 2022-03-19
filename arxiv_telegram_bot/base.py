@@ -31,10 +31,6 @@ from telegram.ext import (
 )
 
 # - Custom Functions
-from arxiv_telegram_bot.models.category.computer_science import ComputerScienceCategory
-from arxiv_telegram_bot.models.category.electrical_engineering_and_systems_science import (
-    ElectricalEngineeringAndSystemsScience,
-)
 from arxiv_telegram_bot.functions.fetch import fetch_latest_paper
 from arxiv_telegram_bot.models.category.category_helper import CategoryHelper
 
