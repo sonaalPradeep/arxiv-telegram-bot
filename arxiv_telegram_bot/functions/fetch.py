@@ -1,14 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import arxiv
+"""
+Arxiv Telegram Bot - Fetch Program
+
+Contains all methods related to fetching and processing arxiv papers
+"""
+
 import re
+import arxiv
 
 from arxiv_telegram_bot.models.category.computer_science import ComputerScienceCategory
 from arxiv_telegram_bot.models.category.category_helper import CategoryHelper
 
 
 def fetch_latest_paper(user_preferences):
+    """
+    fetch_latest_paper method uses the arxiv module to fetch papers with a given user preferences
+    """
     if user_preferences is None or len(user_preferences) == 0:
         query_catalogues = list(
             map(lambda x: x.get_code(), list(ComputerScienceCategory))
@@ -49,9 +58,12 @@ def fetch_latest_paper(user_preferences):
 
 
 def format_content(content):
+    """
+    format_content method is used to format text for markdown parsing
+    """
     escaper = re.compile(r"(\W)")
     return escaper.sub(r"\\\1", content)
 
 
 if __name__ == "__main__":
-    print(fetch_latest_paper())
+    print(fetch_latest_paper({}))
