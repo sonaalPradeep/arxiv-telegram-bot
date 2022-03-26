@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+Arxiv Telegram Bot - Base Program
+
+Program is used to start up the telegram bot
+"""
+
 import logging
 import os
 

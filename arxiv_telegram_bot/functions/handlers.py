@@ -1,3 +1,9 @@
+"""
+Arxiv Telegram Bot - Handlers
+
+Contains all handlers for the telegram bot.
+"""
+
 import logging
 
 import telegram
@@ -20,19 +26,25 @@ CHOOSE_CATEGORY, CHOOSE_TOPIC, FALLBACK = range(3)
 
 
 def start(update: Update, context: CallbackContext):
-    """Send a message when the command 'start' is issued."""
+    """
+    Send a message when the command 'start' is issued.
+    """
     update.message.reply_text("Hi! Your userid")
 
 
 def uid(update: Update, context: CallbackContext):
-    """Ping back the userid whose command created"""
+    """
+    Ping back the userid whose command created
+    """
     message_to_send = f"Your user ID is {context._user_id_and_data[0]}"
     print(message_to_send)
     update.message.reply_text(message_to_send)
 
 
 def fetch(update: Update, context: CallbackContext):
-    """Fetch the latest papers"""
+    """
+    Fetch the latest papers
+    """
     context.bot.send_chat_action(
         chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING
     )
@@ -55,7 +67,9 @@ Publication Date: _{date}_\n\n
 
 
 def preferences_entry(update: Update, context: CallbackContext):
-    """Gather subject preferences of user"""
+    """
+    preferences_entry is the entry point for the conversation handler
+    """
 
     user_preferences = context.user_data.get("CURRENT_PREFERENCES")
 
@@ -73,6 +87,10 @@ def preferences_entry(update: Update, context: CallbackContext):
 
 
 def pick_categories(update: Update, context: CallbackContext):
+    """
+    pick_categories method is the entry point for the preferences conversation handler and is used to
+    pick the category of a subject
+    """
     categories = CategoryHelper()
     catalogues = [[category] for category in categories.get_categories_list()]
     catalogues += [["Exit"]]
@@ -88,6 +106,9 @@ def pick_categories(update: Update, context: CallbackContext):
 
 
 def pick_topic(update: Update, context: CallbackContext):
+    """
+    pick_topic method is the entry point for the preferences conversation handler to pick a topic within a category
+    """
     categories = CategoryHelper()
     response = update.message.text
     context.user_data["CURRENT_CATEGORY"] = response
@@ -110,6 +131,9 @@ def pick_topic(update: Update, context: CallbackContext):
 
 
 def pick_topic_again(update: Update, context: CallbackContext):
+    """
+    pick_topic_again is used to loop and select a subject in the same category
+    """
     categories = CategoryHelper()
     category = context.user_data["CURRENT_CATEGORY"]
     response = update.message.text
@@ -142,6 +166,9 @@ def pick_topic_again(update: Update, context: CallbackContext):
 
 
 def preferences_done(update: Update, context: CallbackContext):
+    """
+    preferences_done is used to end the preferences conversation handler
+    """
     user_preferences = context.user_data.get("CURRENT_PREFERENCES")
 
     if user_preferences is None or len(user_preferences) == 0:
@@ -155,6 +182,9 @@ def preferences_done(update: Update, context: CallbackContext):
 
 
 def preference_conversation_handler():
+    """
+    Preferences conversation handler is used to guide a user to pick their preferences of subjects
+    """
     # TODO: Handler must be able to ignore commands
     # TODO: Verify if callback works
 
@@ -196,4 +226,7 @@ def preference_conversation_handler():
 
 
 def error(update: Update, context: CallbackContext):
+    """
+    Error handler for the telegram bot
+    """
     logger.warning("Update %s caused error %s", update, context.error)
