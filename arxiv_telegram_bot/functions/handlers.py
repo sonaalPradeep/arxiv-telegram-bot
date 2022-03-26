@@ -32,15 +32,6 @@ def start(update: Update, context: CallbackContext):
     update.message.reply_text("Hi! Your userid")
 
 
-def uid(update: Update, context: CallbackContext):
-    """
-    Ping back the userid whose command created
-    """
-    message_to_send = f"Your user ID is {context._user_id_and_data[0]}"
-    print(message_to_send)
-    update.message.reply_text(message_to_send)
-
-
 def fetch(update: Update, context: CallbackContext):
     """
     Fetch the latest papers

@@ -20,7 +20,6 @@ from telegram.ext import (
 
 from arxiv_telegram_bot.functions.handlers import (
     start,
-    uid,
     fetch,
     preference_conversation_handler,
     error,
@@ -45,7 +44,6 @@ def main():
     dispatcher: Dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("test", start))
-    dispatcher.add_handler(CommandHandler("uid", uid))
     dispatcher.add_handler(CommandHandler("latest", fetch))
     dispatcher.add_handler(preference_conversation_handler())
     dispatcher.add_error_handler(error)
