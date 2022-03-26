@@ -1,12 +1,8 @@
-# -- IMPORTS: LIBRARIES
-# - Standard Library Imports
 import logging
 
-# - Telegram Imports
 import telegram
 from telegram import Update
 
-# - Telegram Extended Imports
 from telegram.ext import (
     CallbackContext,
     MessageHandler,
@@ -15,24 +11,19 @@ from telegram.ext import (
     CommandHandler,
 )
 
-# - Custom Functions
 from arxiv_telegram_bot.functions.fetch import fetch_latest_paper
 from arxiv_telegram_bot.models.category.category_helper import CategoryHelper
 
-# - Enable Logging
 logger = logging.getLogger(__name__)
 
-# -- CONSTANTS
 CHOOSE_CATEGORY, CHOOSE_TOPIC, FALLBACK = range(3)
 
-# -- COMMAND HANDLERS
-# - 'start' Command Handler
+
 def start(update: Update, context: CallbackContext):
     """Send a message when the command 'start' is issued."""
     update.message.reply_text("Hi! Your userid")
 
 
-# - 'uid' Command Handler
 def uid(update: Update, context: CallbackContext):
     """Ping back the userid whose command created"""
     message_to_send = f"Your user ID is {context._user_id_and_data[0]}"
@@ -40,7 +31,6 @@ def uid(update: Update, context: CallbackContext):
     update.message.reply_text(message_to_send)
 
 
-# - 'fetch' Command Handler
 def fetch(update: Update, context: CallbackContext):
     """Fetch the latest papers"""
     context.bot.send_chat_action(
@@ -205,6 +195,5 @@ def preference_conversation_handler():
     return preference_handler
 
 
-# - Error Handler
 def error(update: Update, context: CallbackContext):
     logger.warning("Update %s caused error %s", update, context.error)
