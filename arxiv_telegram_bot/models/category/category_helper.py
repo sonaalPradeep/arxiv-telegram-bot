@@ -16,7 +16,7 @@ class CategoryHelper:
     """
 
     def __init__(self):
-        super(CategoryHelper, self).__init__()
+        super().__init__()
 
         self.categories_list = [
             "Computer Science",
