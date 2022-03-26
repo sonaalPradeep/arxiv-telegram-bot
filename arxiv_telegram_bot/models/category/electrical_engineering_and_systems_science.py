@@ -11,7 +11,8 @@ class ElectricalEngineeringAndSystemsScience(dict, Enum):
     """
     Electrical Engineering and Systems Science Category
 
-    This enumerator holds all categories required for Electrical Engineering and Systems Science subjects.
+    This enumerator holds all categories required for Electrical Engineering and Systems Science
+    subjects.
     """
 
     # Name of the category
