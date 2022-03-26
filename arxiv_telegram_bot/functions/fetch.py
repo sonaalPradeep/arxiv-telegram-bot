@@ -7,8 +7,8 @@ Arxiv Telegram Bot - Fetch Program
 Contains all methods related to fetching and processing arxiv papers
 """
 
-import arxiv
 import re
+import arxiv
 
 from arxiv_telegram_bot.models.category.computer_science import ComputerScienceCategory
 from arxiv_telegram_bot.models.category.category_helper import CategoryHelper
