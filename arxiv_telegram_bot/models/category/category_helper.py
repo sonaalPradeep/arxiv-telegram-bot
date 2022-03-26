@@ -14,6 +14,7 @@ class CategoryHelper:
     """
     CategoryHelper contains methods which simplify tasks related to category and subject processes
     """
+
     def __init__(self):
         super(CategoryHelper, self).__init__()
 
