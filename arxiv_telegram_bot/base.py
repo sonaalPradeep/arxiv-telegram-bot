@@ -36,7 +36,6 @@ PORT = int(os.environ.get("PORT", 8443))
 TOKEN = os.environ.get("TOKEN")
 HEROKU_URL = os.environ.get("HEROKU_URL")
 
-
 def main():
     """Start the bot."""
 
