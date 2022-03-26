@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 CHOOSE_CATEGORY, CHOOSE_TOPIC, FALLBACK = range(3)
 
 
-def start(update: Update, context: CallbackContext):
+def start(update: Update, context: CallbackContext):  # pylint: disable=unused-argument
     """
     Send a message when the command 'start' is issued.
     """
@@ -79,7 +79,7 @@ def preferences_entry(update: Update, context: CallbackContext):
     return CHOOSE_CATEGORY
 
 
-def pick_categories(update: Update, context: CallbackContext):
+def pick_categories(update: Update, context: CallbackContext):  # pylint: disable=unused-argument
     """
     pick_categories method is the entry point for the preferences conversation handler and
     is used to pick the category of a subject
