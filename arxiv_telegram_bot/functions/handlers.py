@@ -65,11 +65,15 @@ def preferences_entry(update: Update, context: CallbackContext):
     user_preferences = context.user_data.get("CURRENT_PREFERENCES")
 
     if user_preferences is None or len(user_preferences) == 0:
-        reply_text = "Hey there! Looks like you don't have any preferences set. " \
-                     "Let me help you out"
+        reply_text = (
+            "Hey there! Looks like you don't have any preferences set. "
+            "Let me help you out"
+        )
     else:
-        reply_text = f"Welcome back! Looks like we already have your " \
-                     f"preferences: {user_preferences}"
+        reply_text = (
+            f"Welcome back! Looks like we already have your "
+            f"preferences: {user_preferences}"
+        )
 
     update.message.reply_text(
         reply_text,
@@ -79,7 +83,9 @@ def preferences_entry(update: Update, context: CallbackContext):
     return CHOOSE_CATEGORY
 
 
-def pick_categories(update: Update, context: CallbackContext):  # pylint: disable=unused-argument
+def pick_categories(
+    update: Update, context: CallbackContext
+):  # pylint: disable=unused-argument
     """
     pick_categories method is the entry point for the preferences conversation handler and
     is used to pick the category of a subject
