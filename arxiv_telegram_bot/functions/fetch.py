@@ -66,4 +66,4 @@ def format_content(content):
 
 
 if __name__ == "__main__":
-    print(fetch_latest_paper())
+    print(fetch_latest_paper({}))
