@@ -107,7 +107,8 @@ def pick_categories(update: Update, context: CallbackContext):
 
 def pick_topic(update: Update, context: CallbackContext):
     """
-    pick_topic method is the entry point for the preferences conversation handler to pick a topic within a category
+    pick_topic method is the entry point for the preferences conversation handler to
+    pick a topic within a category
     """
     categories = CategoryHelper()
     response = update.message.text

@@ -14,7 +14,8 @@ import requests
 
 def scrape_arxiv_subject_codes():
     """
-    scrape_arxiv_subject_codes scrapes the arxiv webpage to fetch all the subject categories and subject codes
+    scrape_arxiv_subject_codes scrapes the arxiv webpage to fetch all the
+    subject categories and subject codes
     """
     category_url = "https://arxiv.org/category_taxonomy"
 
