@@ -18,7 +18,7 @@ from telegram.ext import (
     Filters,
     ConversationHandler,
     CommandHandler,
-    CallbackQueryHandler
+    CallbackQueryHandler,
 )
 
 from arxiv_telegram_bot.functions.fetch import fetch_latest_paper
@@ -80,15 +80,15 @@ def preferences_entry(update: Update, context: CallbackContext):
         )
 
     keyboard = [
-            [InlineKeyboardButton("Choose Category", callback_data = "Choose Category")],
-            [InlineKeyboardButton("Exit", callback_data="Exit")],
+        [InlineKeyboardButton("Choose Category", callback_data="Choose Category")],
+        [InlineKeyboardButton("Exit", callback_data="Exit")],
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     update.message.reply_text(
         reply_text,
-        reply_markup = reply_markup,
+        reply_markup=reply_markup,
     )
 
     return CHOOSE_CATEGORY
@@ -105,15 +105,18 @@ def pick_categories(
     query.answer()
 
     categories = CategoryHelper()
-    buttons = [InlineKeyboardButton(category, callback_data=category) for category in categories.get_categories_list()]
-    buttons.extend([InlineKeyboardButton("Exit", callback_data = "Exit")])
-    keyboard = list(map(lambda button : [button], buttons))
+    buttons = [
+        InlineKeyboardButton(category, callback_data=category)
+        for category in categories.get_categories_list()
+    ]
+    buttons.extend([InlineKeyboardButton("Exit", callback_data="Exit")])
+    keyboard = list(map(lambda button: [button], buttons))
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     query.edit_message_text(
         "Please choose your category",
-        reply_markup= reply_markup,
+        reply_markup=reply_markup,
     )
 
     return CHOOSE_TOPIC
@@ -127,7 +130,6 @@ def pick_topic(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
 
-
     categories = CategoryHelper()
     response = update.callback_query.data
     context.user_data["CURRENT_CATEGORY"] = response
@@ -138,16 +140,19 @@ def pick_topic(update: Update, context: CallbackContext):
     enum_category = categories.get_enumerate_from_name(response)
     catalogues = list(map(lambda x: [x.get_name()], list(enum_category)))
 
-    buttons = [InlineKeyboardButton(catalogue[0], callback_data=catalogue[0]) for catalogue in catalogues]
+    buttons = [
+        InlineKeyboardButton(catalogue[0], callback_data=catalogue[0])
+        for catalogue in catalogues
+    ]
     buttons.extend([InlineKeyboardButton("Go back", callback_data="Go back")])
 
-    keyboard = list(map(lambda button : [button], buttons))
+    keyboard = list(map(lambda button: [button], buttons))
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     query.edit_message_text(
         "Please choose your topic",
-        reply_markup= reply_markup,
+        reply_markup=reply_markup,
     )
 
     return CHOOSE_TOPIC
@@ -174,7 +179,7 @@ def pick_topic_again(update: Update, context: CallbackContext):
         if len(context.user_data["CURRENT_PREFERENCES"][category]) == 0:
             del context.user_data["CURRENT_PREFERENCES"][category]
 
-    query.answer(text = reply_text, show_alert = False)
+    query.answer(text=reply_text, show_alert=False)
 
     return CHOOSE_TOPIC
 
@@ -216,9 +221,9 @@ def preference_conversation_handler():
                 CallbackQueryHandler(preferences_done, pattern="^Exit$"),
             ],
             CHOOSE_TOPIC: [
-                CallbackQueryHandler(pick_topic, pattern = catalogues_filter),
-                CallbackQueryHandler(pick_categories, pattern = "^Go back$"),
-                CallbackQueryHandler(preferences_done, pattern = "^Exit$"),
+                CallbackQueryHandler(pick_topic, pattern=catalogues_filter),
+                CallbackQueryHandler(pick_categories, pattern="^Go back$"),
+                CallbackQueryHandler(preferences_done, pattern="^Exit$"),
                 CallbackQueryHandler(pick_topic_again),
             ],
         },
