@@ -158,9 +158,6 @@ def pick_topic_again(update: Update, context: CallbackContext):
     pick_topic_again is used to loop and select a subject in the same category
     """
     query = update.callback_query
-    query.answer()
-
-    categories = CategoryHelper()
     category = context.user_data["CURRENT_CATEGORY"]
     response = update.callback_query.data
 
@@ -177,19 +174,7 @@ def pick_topic_again(update: Update, context: CallbackContext):
         if len(context.user_data["CURRENT_PREFERENCES"][category]) == 0:
             del context.user_data["CURRENT_PREFERENCES"][category]
 
-    enum_category = categories.get_enumerate_from_name(category)
-    catalogues = list(map(lambda x: [x.get_name()], list(enum_category)))
-
-    buttons = [InlineKeyboardButton(catalogue[0], callback_data=catalogue[0]) for catalogue in catalogues]
-    buttons.extend([InlineKeyboardButton("Go back", callback_data="Go back")])
-
-    keyboard = list(map(lambda button : [button], buttons))
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(
-        reply_text,
-        reply_markup=reply_markup,
-    )
+    query.answer(text = reply_text, show_alert = False)
 
     return CHOOSE_TOPIC
 
