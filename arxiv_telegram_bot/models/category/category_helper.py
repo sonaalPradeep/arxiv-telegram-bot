@@ -9,8 +9,17 @@ This program contains the wrapper to make category and subject related processes
 
 from arxiv_telegram_bot.models.category.computer_science import ComputerScienceCategory
 from arxiv_telegram_bot.models.category.electrical_engineering_and_systems_science import (
-    ElectricalEngineeringAndSystemsScience,
+    ElectricalEngineeringAndSystemsScienceCategory,
 )
+from arxiv_telegram_bot.models.category.economics import EconomicsCategory
+from arxiv_telegram_bot.models.category.mathematics import MathematicsCategory
+from arxiv_telegram_bot.models.category.quantitative_biology import (
+    QuantitativeBiologyCategory,
+)
+from arxiv_telegram_bot.models.category.quantitative_finance import (
+    QuantitativeFinanceCategory,
+)
+from arxiv_telegram_bot.models.category.statistics import StatisticsCategory
 
 
 class CategoryHelper:
@@ -24,11 +33,23 @@ class CategoryHelper:
         self.categories_list = [
             "Computer Science",
             "Electrical Engineering and Systems Science",
+            "Economics",
+            "Mathematics",
+            "Quantitative Biology",
+            "Quantitative Finance",
+            "Statistics",
         ]
+
         self.enum_list = [
             ComputerScienceCategory,
-            ElectricalEngineeringAndSystemsScience,
+            ElectricalEngineeringAndSystemsScienceCategory,
+            EconomicsCategory,
+            MathematicsCategory,
+            QuantitativeBiologyCategory,
+            QuantitativeFinanceCategory,
+            StatisticsCategory,
         ]
+
         self.category_enum_mapping = dict(zip(self.categories_list, self.enum_list))
         self.name_code_mapping = {}
 
