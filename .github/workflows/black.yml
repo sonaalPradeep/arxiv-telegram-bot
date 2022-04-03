@@ -14,5 +14,5 @@ jobs:
       - uses: programmingwithalex/pylinters@v1.4.2
         with:
           skip-flake8: true
-
+          skip-mypy: true
 
