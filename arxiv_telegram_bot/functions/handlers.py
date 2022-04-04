@@ -11,6 +11,13 @@ import logging
 
 import telegram
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+import redis
+
+r = redis.Redis(
+    host='localhost',
+    port=6398
+)
+db_keys = r.keys(pattern='*')
 
 from telegram.ext import (
     CallbackContext,
@@ -22,6 +29,8 @@ from telegram.ext import (
 )
 
 from arxiv_telegram_bot.functions.fetch import fetch_latest_paper
+from arxiv_telegram_bot.functions.update import paper_updates
+from arxiv_telegram_bot.functions.store import get_user_preferences, remove_user, add_user
 from arxiv_telegram_bot.models.category.category_helper import CategoryHelper
 
 logger = logging.getLogger(__name__)
@@ -41,7 +50,7 @@ def fetch(update: Update, context: CallbackContext):
     Fetch the latest papers
     """
     context.bot.send_chat_action(
-        chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING
+        chat_id=update.effective_chat.id, action=telegram.ChatAction.TYPING
     )
 
     title, date, summary, categories, abs_url, pdf_url = fetch_latest_paper(
@@ -60,6 +69,30 @@ Publication Date: _{date}_\n\n
         message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2
     )
 
+def update(update: Update, context: CallbackContext):
+    """Check for new papers in category"""
+
+    logging.info('checkpoint 0')
+
+    logging.info('checkpoint 1')
+
+    catalogue = ['cs.LG', 'cs.NE', 'cs.RO', 'cs.CL', 'cs.AI', 'cs.CV', 'eess.IV', 'eess.SP', 'eess.SY', 'eess.AS']
+    for topic in catalogue:
+        logging.info('checkpoint 2')
+        title, date, summary, categories, abs_url, pdf_url = paper_updates(topic)
+        for user_chat_id in get_user_preferences(topic):
+            update.message.chat.id = int(user_chat_id)
+            message_to_send = f"""
+*New paper added in `\({topic}\)` category::*\n
+*{title}* `\({categories}\)`\n
+Publication Date: _{date}_\n\n
+{summary}\n
+
+[Click here to open the Arxiv page]({abs_url})
+[Click here to open the PDF]({pdf_url})"""
+            update.message.reply_text(message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2)
+    logging.info('checkpoint 3')
+    print("CheckPoint reached")
 
 def preferences_entry(update: Update, context: CallbackContext):
     """
@@ -166,14 +199,16 @@ def pick_topic_again(update: Update, context: CallbackContext):
     category = context.user_data["CURRENT_CATEGORY"]
     response = update.callback_query.data
 
-    if category not in context.user_data["CURRENT_PREFERENCES"]:
+    if category not in get_user_preferences(update.effective_chat.id, context):
         context.user_data["CURRENT_PREFERENCES"][category] = set([])
 
     if response not in context.user_data.get("CURRENT_PREFERENCES").get(category):
         context.user_data["CURRENT_PREFERENCES"][category].add(response)
+        add_user(update.effective_chat.id, category, response)
         reply_text = f"Added {response} to your preferences"
     else:
         context.user_data["CURRENT_PREFERENCES"][category].remove(response)
+        remove_user(update.effective_chat.id, category, response)
         reply_text = f"Removed {response} to your preferences"
 
         if len(context.user_data["CURRENT_PREFERENCES"][category]) == 0:

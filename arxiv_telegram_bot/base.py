@@ -23,6 +23,7 @@ from arxiv_telegram_bot.functions.handlers import (
     fetch,
     preference_conversation_handler,
     error,
+    update,
 )
 
 
@@ -46,6 +47,7 @@ def main():
     dispatcher.add_handler(CommandHandler("test", start))
     dispatcher.add_handler(CommandHandler("latest", fetch))
     dispatcher.add_handler(preference_conversation_handler())
+    dispatcher.add_handler(CommandHandler("update", update))
     dispatcher.add_error_handler(error)
 
     if os.environ.get("ENV") == "HEROKU":
