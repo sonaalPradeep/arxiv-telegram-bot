@@ -11,13 +11,7 @@ import logging
 
 import telegram
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-import redis
 
-r = redis.Redis(
-    host='localhost',
-    port=6398
-)
-db_keys = r.keys(pattern='*')
 
 from telegram.ext import (
     CallbackContext,
@@ -30,7 +24,15 @@ from telegram.ext import (
 
 from arxiv_telegram_bot.functions.fetch import fetch_latest_paper
 from arxiv_telegram_bot.functions.update import paper_updates
-from arxiv_telegram_bot.functions.store import get_user_preferences, remove_user, add_user
+from arxiv_telegram_bot.functions.store import (
+    get_user_preferences,
+    remove_user_preferences,
+    add_user_preferences,
+    store_paper_update,
+    get_stored_papers,
+    add_user,
+    get_users,
+)
 from arxiv_telegram_bot.models.category.category_helper import CategoryHelper
 
 logger = logging.getLogger(__name__)
@@ -42,6 +44,8 @@ def start(update: Update, context: CallbackContext):  # pylint: disable=unused-a
     """
     Send a message when the command 'start' is issued.
     """
+    add_user(update.effective_chat.id)
+
     update.message.reply_text("Hi! Your userid")
 
 
@@ -49,6 +53,8 @@ def fetch(update: Update, context: CallbackContext):
     """
     Fetch the latest papers
     """
+    add_user(update.effective_chat.id)  # Adds user incase missing in DB
+
     context.bot.send_chat_action(
         chat_id=update.effective_chat.id, action=telegram.ChatAction.TYPING
     )
@@ -73,8 +79,37 @@ def update(update: Update, context: CallbackContext):
     """Check for new papers in category"""
 
     logging.info('checkpoint 0')
+    catalogue = CategoryHelper()
+    print(catalogue)
+    print(catalogue.categories_list)
+    x = catalogue.categories_list
+    print(catalogue.name_code_mapping)
+    print(catalogue.name_code_mapping.values())
 
-    logging.info('checkpoint 1')
+    print(get_users())
+
+    for user in get_users():
+        print(user)
+
+
+    for category, topics in catalogue.name_code_mapping.items():
+        print(category)
+        print(topics)
+        store_paper_update(category, topics)
+    logging.info('checkpoint 4')
+
+    # for user in get
+
+    logging.info('checkpoint 6')
+
+    print(catalogue)
+    print(catalogue.categories_list)
+    print(catalogue.name_code_mapping)
+    for category in catalogue.name_code_mapping:
+
+
+    # catalogues_filter = "^(" + "|".join(categories.get_categories_list()) + ")$"
+        logging.info('checkpoint 1')
 
     catalogue = ['cs.LG', 'cs.NE', 'cs.RO', 'cs.CL', 'cs.AI', 'cs.CV', 'eess.IV', 'eess.SP', 'eess.SY', 'eess.AS']
     for topic in catalogue:
@@ -98,6 +133,7 @@ def preferences_entry(update: Update, context: CallbackContext):
     """
     preferences_entry is the entry point for the conversation handler
     """
+    add_user(update.effective_chat.id)  # Adds user incase missing in DB
 
     user_preferences = context.user_data.get("CURRENT_PREFERENCES")
 
@@ -204,11 +240,11 @@ def pick_topic_again(update: Update, context: CallbackContext):
 
     if response not in context.user_data.get("CURRENT_PREFERENCES").get(category):
         context.user_data["CURRENT_PREFERENCES"][category].add(response)
-        add_user(update.effective_chat.id, category, response)
+        add_user_preferences(update.effective_chat.id, category, response)
         reply_text = f"Added {response} to your preferences"
     else:
         context.user_data["CURRENT_PREFERENCES"][category].remove(response)
-        remove_user(update.effective_chat.id, category, response)
+        remove_user_preferences(update.effective_chat.id, category, response)
         reply_text = f"Removed {response} to your preferences"
 
         if len(context.user_data["CURRENT_PREFERENCES"][category]) == 0:
