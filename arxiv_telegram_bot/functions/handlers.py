@@ -50,7 +50,7 @@ def fetch(update: Update, context: CallbackContext):
 
     try:
         message_to_send = f"""
-*{title}** `\({categories}\)`\n
+*{title}* `\({categories}\)`\n
 Publication Date: _{date}_\n\n
 {summary}\n
 
