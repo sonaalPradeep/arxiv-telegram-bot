@@ -10,7 +10,7 @@ Contains all handlers for the telegram bot.
 import logging
 
 import telegram
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, TelegramError
 
 from telegram.ext import (
     CallbackContext,
@@ -47,18 +47,29 @@ def fetch(update: Update, context: CallbackContext):
     title, date, summary, categories, abs_url, pdf_url = fetch_latest_paper(
         context.user_data.get("CURRENT_PREFERENCES")
     )
-    summary = summary.replace("\n", "")
-    message_to_send = f"""
-*{title}* `\({categories}\)`\n
+
+    try:
+        message_to_send = f"""
+*{title}** `\({categories}\)`\n
 Publication Date: _{date}_\n\n
 {summary}\n
 
 [Click here to open the Arxiv page]({abs_url})
 [Click here to open the PDF]({pdf_url})"""
 
-    update.message.reply_text(
-        message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2
-    )
+        update.message.reply_text(
+            message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2
+        )
+    except (TelegramError, Exception) as e:
+        logger.error("Exception occurred while getting message", e)
+
+        failure_message = (
+            f"Something went wrong while trying to get paper: *{title}*\.\n\n"
+            f"You can access the paper from [this URL]({abs_url})\."
+        )
+        update.message.reply_text(
+            failure_message, parse_mode=telegram.ParseMode.MARKDOWN_V2
+        )
 
 
 def preferences_entry(update: Update, context: CallbackContext):
