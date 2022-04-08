@@ -44,7 +44,7 @@ def fetch_latest_paper(user_preferences):
 
     title = format_content(result.title)
     date = format_content(str(result.published).split()[0])
-    summary = format_content(result.summary)
+    summary = format_content(result.summary).replace("\n", "")
 
     categories = format_content(", ".join(result.categories))
 
