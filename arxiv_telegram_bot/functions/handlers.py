@@ -63,9 +63,13 @@ Publication Date: _{date}_\n\n
     except (TelegramError, Exception) as e:
         logger.error("Exception occurred while getting message", e)
 
-        failure_message = f"Something went wrong while trying to get paper: *{title}*\.\n\n" \
-                          f"You can access the paper from [this URL]({abs_url})\."
-        update.message.reply_text(failure_message, parse_mode=telegram.ParseMode.MARKDOWN_V2)
+        failure_message = (
+            f"Something went wrong while trying to get paper: *{title}*\.\n\n"
+            f"You can access the paper from [this URL]({abs_url})\."
+        )
+        update.message.reply_text(
+            failure_message, parse_mode=telegram.ParseMode.MARKDOWN_V2
+        )
 
 
 def preferences_entry(update: Update, context: CallbackContext):
