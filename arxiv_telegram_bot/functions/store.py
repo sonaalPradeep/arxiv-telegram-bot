@@ -85,11 +85,8 @@ def get_user_preferences(chat_id, context: CallbackContext):
 def store_paper_update(category, topics):
     """store latest papers for each category"""
     Category = {}
-
-    print(topics.items())
     for topic in topics.items():
         (topicer, code) = topic
-        print(f"{topicer} {code}")
         search = arxiv.Search(
             query=code,
             max_results=1,
@@ -100,13 +97,9 @@ def store_paper_update(category, topics):
         result = search.results().__next__()
         setTime = datetime.datetime.now()
         setTime = setTime.replace(tzinfo=pytz.utc)
-        print(setTime)
         setTime = setTime - datetime.timedelta(hours=50)
         # TODO hours need to be altered
-        print(setTime)
         if result.published > setTime:
-            print(result.published)
-
             paper_dict = {}
 
             title = format_content(result.title)

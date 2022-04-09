@@ -10,8 +10,7 @@ Contains all handlers for the telegram bot.
 import logging
 
 import telegram
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, TelegramError
 
 from telegram.ext import (
     CallbackContext,
@@ -43,8 +42,6 @@ def start(update: Update, context: CallbackContext):  # pylint: disable=unused-a
     """
     Send a message when the command 'start' is issued.
     """
-    add_user(update.effective_chat.id)
-
     update.message.reply_text("Hi! Your userid")
 
 
@@ -61,8 +58,9 @@ def fetch(update: Update, context: CallbackContext):
     title, date, summary, categories, abs_url, pdf_url = fetch_latest_paper(
         context.user_data.get("CURRENT_PREFERENCES")
     )
-    summary = summary.replace("\n", "")
-    message_to_send = f"""
+
+    try:
+        message_to_send = f"""
 *{title}* `\({categories}\)`\n
 Publication Date: _{date}_\n\n
 {summary}\n
@@ -70,9 +68,19 @@ Publication Date: _{date}_\n\n
 [Click here to open the Arxiv page]({abs_url})
 [Click here to open the PDF]({pdf_url})"""
 
-    update.message.reply_text(
-        message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2
-    )
+        update.message.reply_text(
+            message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2
+        )
+    except (TelegramError, Exception) as e:
+        logger.error("Exception occurred while getting message", e)
+
+        failure_message = (
+            f"Something went wrong while trying to get paper: *{title}*\.\n\n"
+            f"You can access the paper from [this URL]({abs_url})\."
+        )
+        update.message.reply_text(
+            failure_message, parse_mode=telegram.ParseMode.MARKDOWN_V2
+        )
 
 def update(update: Update, context: CallbackContext):
     """Check for new papers in category"""
@@ -81,12 +89,8 @@ def update(update: Update, context: CallbackContext):
     catalogue = CategoryHelper()
 
     for category, topics in catalogue.name_code_mapping.items():
-        print(category)  #TODO remove print statements
-        print(topics)
-        # store_paper_update(category, topics)
-        # TODO uncomment later
+        store_paper_update(category, topics)
     if get_users():
-        print(get_users())  #TODO remove later
         for user in get_users():
             if get_user_preferences(user, context):
                 for category, topics in context.user_data['CURRENT_PREFERENCES'].items():
@@ -100,7 +104,8 @@ def update(update: Update, context: CallbackContext):
                             categories = paper['categories']
                             abs_url = paper['abs_url']
                             pdf_url = paper['pdf_url']
-                            message_to_send = f"""
+                            try:
+                                message_to_send = f"""
 *New paper added in {category}:{topic}::*\n
 *{title}* `\({categories}\)`\n
 Publication Date: _{date}_\n\n
@@ -108,12 +113,19 @@ Publication Date: _{date}_\n\n
 
 [Click here to open the Arxiv page]({abs_url})
 [Click here to open the PDF]({pdf_url})"""
-                            logging.info('checkpoint 2')
-                            update.effective_chat.id = user
-                            update.message.reply_text(message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2)
-                            logging.info('checkpoint 3')
+                                update.effective_chat.id = user
+                                update.message.reply_text(message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2)
 
-    logging.info('checkpoint 0')
+                            except (TelegramError, Exception) as e:
+                                logger.error("Exception occurred while getting message", e)
+
+                                failure_message = (
+                                    f"Something went wrong while trying to get paper: *{title}*\.\n\n"
+                                    f"You can access the paper from [this URL]({abs_url})\."
+                                )
+                                update.message.reply_text(
+                                    failure_message, parse_mode=telegram.ParseMode.MARKDOWN_V2
+                                )
 
 
 def preferences_entry(update: Update, context: CallbackContext):
