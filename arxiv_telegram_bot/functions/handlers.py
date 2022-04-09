@@ -10,7 +10,7 @@ Contains all handlers for the telegram bot.
 import logging
 
 import telegram
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, TelegramError
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 
 
 from telegram.ext import (
@@ -23,13 +23,12 @@ from telegram.ext import (
 )
 
 from arxiv_telegram_bot.functions.fetch import fetch_latest_paper
-from arxiv_telegram_bot.functions.update import paper_updates
 from arxiv_telegram_bot.functions.store import (
     get_user_preferences,
     remove_user_preferences,
     add_user_preferences,
     store_paper_update,
-    get_stored_papers,
+    get_stored_paper,
     add_user,
     get_users,
 )
@@ -62,79 +61,60 @@ def fetch(update: Update, context: CallbackContext):
     title, date, summary, categories, abs_url, pdf_url = fetch_latest_paper(
         context.user_data.get("CURRENT_PREFERENCES")
     )
-
-    try:
-        message_to_send = f"""
-*{title}** `\({categories}\)`\n
-Publication Date: _{date}_\n\n
-{summary}\n
-
-[Click here to open the Arxiv page]({abs_url})
-[Click here to open the PDF]({pdf_url})"""
-
-        update.message.reply_text(
-            message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2
-        )
-    except (TelegramError, Exception) as e:
-        logger.error("Exception occurred while getting message", e)
-
-        failure_message = f"Something went wrong while trying to get paper: *{title}*\.\n\n" \
-                          f"You can access the paper from [this URL]({abs_url})\."
-        update.message.reply_text(failure_message, parse_mode=telegram.ParseMode.MARKDOWN_V2)
-
-def update(update: Update, context: CallbackContext):
-    """Check for new papers in category"""
-
-    logging.info('checkpoint 0')
-    catalogue = CategoryHelper()
-    print(catalogue)
-    print(catalogue.categories_list)
-    x = catalogue.categories_list
-    print(catalogue.name_code_mapping)
-    print(catalogue.name_code_mapping.values())
-
-    print(get_users())
-
-    for user in get_users():
-        print(user)
-
-
-    for category, topics in catalogue.name_code_mapping.items():
-        print(category)
-        print(topics)
-        store_paper_update(category, topics)
-    logging.info('checkpoint 4')
-
-    # for user in get
-
-    logging.info('checkpoint 6')
-
-    print(catalogue)
-    print(catalogue.categories_list)
-    print(catalogue.name_code_mapping)
-    for category in catalogue.name_code_mapping:
-
-
-    # catalogues_filter = "^(" + "|".join(categories.get_categories_list()) + ")$"
-        logging.info('checkpoint 1')
-
-    catalogue = ['cs.LG', 'cs.NE', 'cs.RO', 'cs.CL', 'cs.AI', 'cs.CV', 'eess.IV', 'eess.SP', 'eess.SY', 'eess.AS']
-    for topic in catalogue:
-        logging.info('checkpoint 2')
-        title, date, summary, categories, abs_url, pdf_url = paper_updates(topic)
-        for user_chat_id in get_user_preferences(topic):
-            update.message.chat.id = int(user_chat_id)
-            message_to_send = f"""
-*New paper added in `\({topic}\)` category::*\n
+    summary = summary.replace("\n", "")
+    message_to_send = f"""
 *{title}* `\({categories}\)`\n
 Publication Date: _{date}_\n\n
 {summary}\n
 
 [Click here to open the Arxiv page]({abs_url})
 [Click here to open the PDF]({pdf_url})"""
-            update.message.reply_text(message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2)
-    logging.info('checkpoint 3')
-    print("CheckPoint reached")
+
+    update.message.reply_text(
+        message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2
+    )
+
+def update(update: Update, context: CallbackContext):
+    """Check for new papers in category"""
+    add_user(update.effective_chat.id)  # Adds user incase missing in DB
+
+    catalogue = CategoryHelper()
+
+    for category, topics in catalogue.name_code_mapping.items():
+        print(category)  #TODO remove print statements
+        print(topics)
+        # store_paper_update(category, topics)
+        # TODO uncomment later
+    if get_users():
+        print(get_users())  #TODO remove later
+        for user in get_users():
+            if get_user_preferences(user, context):
+                for category, topics in context.user_data['CURRENT_PREFERENCES'].items():
+                    for topic in topics:
+                        topicCode = catalogue.name_code_mapping[category][topic]
+                        paper = get_stored_paper(category, topicCode)
+                        if paper:
+                            title = paper['title']
+                            date = paper['date']
+                            summary = paper['summary']
+                            categories = paper['categories']
+                            abs_url = paper['abs_url']
+                            pdf_url = paper['pdf_url']
+                            message_to_send = f"""
+*New paper added in {category}:{topic}::*\n
+*{title}* `\({categories}\)`\n
+Publication Date: _{date}_\n\n
+{summary}\n
+
+[Click here to open the Arxiv page]({abs_url})
+[Click here to open the PDF]({pdf_url})"""
+                            logging.info('checkpoint 2')
+                            update.effective_chat.id = user
+                            update.message.reply_text(message_to_send, parse_mode=telegram.ParseMode.MARKDOWN_V2)
+                            logging.info('checkpoint 3')
+
+    logging.info('checkpoint 0')
+
 
 def preferences_entry(update: Update, context: CallbackContext):
     """
