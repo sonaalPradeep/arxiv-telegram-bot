@@ -13,6 +13,7 @@ import pytz
 import re
 import redis
 import pickle
+import logging
 
 from telegram.ext import CallbackContext
 
@@ -38,6 +39,29 @@ def get_users():
         return pickle.loads(r.get('Users'))
     else:
         return set([])
+
+
+def add_remove_subscriber(chat_id):
+    """add or remove subscriber chat id"""
+    if r.get('Subscribers'):
+        subscribers = pickle.loads(r.get('Subscribers'))
+        if chat_id in subscribers:
+            subscribers.remove(chat_id)
+            r.set('Subscribers', pickle.dumps(subscribers))
+            logging.info('User removed from subscription list')
+        else:
+            subscribers.add(chat_id)
+            r.set('Subscribers', pickle.dumps(subscribers))
+            logging.info('User added to subscription list')
+    else:
+        subscribers = set([chat_id])
+        r.set('Subscribers', pickle.dumps(subscribers))
+        logging.info('User added to subscription list')
+
+
+def get_subscription_list():
+    if r.get('Subscribers'):
+        return pickle.loads(r.get('Subscribers'))
 
 
 def add_user_preferences(chat_id, category, response):
@@ -73,22 +97,28 @@ def remove_user_preferences(chat_id, category, response):
 
 def get_user_preferences(chat_id, context: CallbackContext):
     """store/cache chat_id and user_preferences"""
-    if r.get(chat_id):  # I don't know if nil will be treated like None by if statement
+    if r.get(chat_id):
         catalogue = pickle.loads(r.get(chat_id))
         context.user_data["CURRENT_PREFERENCES"] = catalogue
         return context.user_data["CURRENT_PREFERENCES"]
     return []
 
-# TODO Confirm that adding user preferences is working as expected
+
+def store_update_time():
+    r.set('Time', pickle.dumps(datetime.datetime.now()))
+
+
+def get_update_time():
+    if r.get('Time'):
+        return pickle.loads(r.get('Time'))
 
 
 def store_paper_update(category, topics):
     """store latest papers for each category"""
     Category = {}
     for topic in topics.items():
-        (topicer, code) = topic
         search = arxiv.Search(
-            query=code,
+            query=topic[1],
             max_results=1,
             sort_by=arxiv.SortCriterion.SubmittedDate,
             sort_order=arxiv.SortOrder.Descending,
@@ -97,8 +127,7 @@ def store_paper_update(category, topics):
         result = search.results().__next__()
         setTime = datetime.datetime.now()
         setTime = setTime.replace(tzinfo=pytz.utc)
-        setTime = setTime - datetime.timedelta(hours=50)
-        # TODO hours need to be altered
+        setTime = setTime - datetime.timedelta(hours=100)    # TODO hours need to be altered
         if result.published > setTime:
             paper_dict = {}
 
@@ -125,12 +154,12 @@ def store_paper_update(category, topics):
 
             try:
                 Category = pickle.loads(r.get(category))
-                Category[code] = paper_dict
+                Category[topic[1]] = paper_dict
                 # Only supports one paper right now, make it into a list once we confirm that this works
                 r.set(category, pickle.dumps(Category))
             except:
                 r.delete(category)
-                Category[code] = paper_dict
+                Category[topic[1]] = paper_dict
                 # Only supports one paper right now, make it into a list once we confirm that this works
                 r.set(category, pickle.dumps(Category))
 

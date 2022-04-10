@@ -6,7 +6,7 @@ Arxiv Telegram Bot - Handlers
 
 Contains all handlers for the telegram bot.
 """
-
+import datetime
 import logging
 
 import telegram
@@ -14,11 +14,11 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Telegra
 
 from telegram.ext import (
     CallbackContext,
-    MessageHandler,
-    Filters,
     ConversationHandler,
     CommandHandler,
     CallbackQueryHandler,
+    Updater,
+    Dispatcher,
 )
 
 from arxiv_telegram_bot.functions.fetch import fetch_latest_paper
@@ -30,6 +30,9 @@ from arxiv_telegram_bot.functions.store import (
     get_stored_paper,
     add_user,
     get_users,
+    store_update_time,
+    get_update_time,
+    add_remove_subscriber, get_subscription_list,
 )
 from arxiv_telegram_bot.models.category.category_helper import CategoryHelper
 
@@ -85,13 +88,22 @@ Publication Date: _{date}_\n\n
 def update(update: Update, context: CallbackContext):
     """Check for new papers in category"""
     add_user(update.effective_chat.id)  # Adds user incase missing in DB
+    add_remove_subscriber(update.effective_chat.id)
 
     catalogue = CategoryHelper()
 
-    for category, topics in catalogue.name_code_mapping.items():
-        store_paper_update(category, topics)
-    if get_users():
-        for user in get_users():
+    if get_update_time() is not None:
+        if (datetime.datetime.now() - get_update_time()) >= datetime.timedelta(hours=6):
+            for category, topics in catalogue.name_code_mapping.items():
+                store_paper_update(category, topics)
+            store_update_time()
+    else:
+        for category, topics in catalogue.name_code_mapping.items():
+            store_paper_update(category, topics)
+        store_update_time()
+
+    if get_subscription_list():
+        for user in get_subscription_list():
             if get_user_preferences(user, context):
                 for category, topics in context.user_data['CURRENT_PREFERENCES'].items():
                     for topic in topics:
