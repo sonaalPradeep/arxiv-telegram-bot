@@ -10,7 +10,7 @@ Enumerator for the CS subjects
 from enum import Enum
 
 
-class ComputerScienceCategory(dict, Enum):
+class ComputerScienceCategory(dict, Enum):  # type: ignore[misc]
     """
     Computer Science Category
 

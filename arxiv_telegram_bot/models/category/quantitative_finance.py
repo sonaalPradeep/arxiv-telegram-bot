@@ -10,7 +10,7 @@ Enumerator for the Q-FIN subjects
 from enum import Enum
 
 
-class QuantitativeFinanceCategory(dict, Enum):
+class QuantitativeFinanceCategory(dict, Enum):  # type: ignore[misc]
     """
     Quantitative Finance Category
 

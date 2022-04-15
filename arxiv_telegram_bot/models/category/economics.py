@@ -10,7 +10,7 @@ Enumerator for the ECON subjects
 from enum import Enum
 
 
-class EconomicsCategory(dict, Enum):
+class EconomicsCategory(dict, Enum):  # type: ignore[misc]
     """
     Economics Category
 

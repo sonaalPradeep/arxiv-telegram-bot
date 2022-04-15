@@ -19,5 +19,4 @@ jobs:
 
       - uses: programmingwithalex/pylinters@v1.4.2
         with:
-          skip-mypy: true
           skip-isort: true

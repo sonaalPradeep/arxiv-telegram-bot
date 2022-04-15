@@ -10,7 +10,7 @@ Enumerator for the STAT subjects
 from enum import Enum
 
 
-class StatisticsCategory(dict, Enum):
+class StatisticsCategory(dict, Enum):  # type: ignore[misc]
     """
     Statistics Category
 

@@ -10,7 +10,7 @@ Enumerator for the MCAH subjects
 from enum import Enum
 
 
-class MathematicsCategory(dict, Enum):
+class MathematicsCategory(dict, Enum):  # type: ignore[misc]
     """
     Mathematics Category
 
