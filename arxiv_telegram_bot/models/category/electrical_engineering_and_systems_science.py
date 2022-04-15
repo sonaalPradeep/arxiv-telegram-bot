@@ -10,7 +10,7 @@ Enumerator for the EESS subjects
 from enum import Enum
 
 
-class ElectricalEngineeringAndSystemsScienceCategory(dict, Enum):
+class ElectricalEngineeringAndSystemsScienceCategory(dict, Enum):  # type: ignore[misc]
     """
     Electrical Engineering and Systems Science Category
 

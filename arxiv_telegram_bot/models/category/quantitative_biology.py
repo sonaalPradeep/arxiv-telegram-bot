@@ -10,7 +10,7 @@ Enumerator for the Q-BIO subjects
 from enum import Enum
 
 
-class QuantitativeBiologyCategory(dict, Enum):
+class QuantitativeBiologyCategory(dict, Enum):  # type: ignore[misc]
     """
     Quantitative Biology Category
 

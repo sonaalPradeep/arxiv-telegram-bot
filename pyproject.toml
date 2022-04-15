@@ -20,6 +20,20 @@ pylint = "^2.13.1"
 flake8 = "^4.0.1"
 mypy = "^0.942"
 
+[tool.mypy]
+show_none_errors = false
+show_error_codes = true
+show_error_context = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = ["arxiv_telegram_bot.*", "bs4", "requests", "arxiv", "pytest", "dotenv", "telegram", "telegram.ext"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["arxiv_telegram_bot.models.category.*"]
+ignore_errors = true
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
