@@ -13,11 +13,6 @@ import pytz
 import re
 import redis
 import pickle
-import logging
-
-from telegram.ext import CallbackContext
-
-from arxiv_telegram_bot.models.category.category_helper import CategoryHelper
 
 r = redis.StrictRedis(host='localhost', port=6379, db=0)  # What is db=0? Clarify before push
 
@@ -39,69 +34,6 @@ def get_users():
         return pickle.loads(r.get('Users'))
     else:
         return set([])
-
-
-def add_remove_subscriber(chat_id):
-    """add or remove subscriber chat id"""
-    if r.get('Subscribers'):
-        subscribers = pickle.loads(r.get('Subscribers'))
-        if chat_id in subscribers:
-            subscribers.remove(chat_id)
-            r.set('Subscribers', pickle.dumps(subscribers))
-            logging.info('User removed from subscription list')
-        else:
-            subscribers.add(chat_id)
-            r.set('Subscribers', pickle.dumps(subscribers))
-            logging.info('User added to subscription list')
-    else:
-        subscribers = set([chat_id])
-        r.set('Subscribers', pickle.dumps(subscribers))
-        logging.info('User added to subscription list')
-
-
-def get_subscription_list():
-    if r.get('Subscribers'):
-        return pickle.loads(r.get('Subscribers'))
-
-
-def add_user_preferences(chat_id, category, response):
-    """store/cache chat_id and user_preferences"""
-    if r.get(chat_id):
-        catalogue = pickle.loads(r.get(chat_id))
-        if catalogue.get(category):
-            catalogue[category].add(response)
-        else:
-            catalogue[category] = set([response])
-        r.set(chat_id, pickle.dumps(catalogue))
-    else:
-        catalogue = {category: set([response])}
-        r.set(chat_id, pickle.dumps(catalogue))
-
-    return "User Added"
-
-
-def remove_user_preferences(chat_id, category, response):
-    """remove chat_id and user_preferences"""
-    catalogue = pickle.loads(r.get(chat_id))
-    catalogue[category].remove(response)
-    if catalogue[category]:
-        r.set(chat_id, pickle.dumps(catalogue))
-    else:
-        del catalogue[category]
-        if catalogue:
-            r.set(chat_id, pickle.dumps(catalogue))
-        else:
-            r.delete(chat_id)
-    return "Topic Removed"
-
-
-def get_user_preferences(chat_id, context: CallbackContext):
-    """store/cache chat_id and user_preferences"""
-    if r.get(chat_id):
-        catalogue = pickle.loads(r.get(chat_id))
-        context.user_data["CURRENT_PREFERENCES"] = catalogue
-        return context.user_data["CURRENT_PREFERENCES"]
-    return []
 
 
 def store_update_time():
@@ -178,7 +110,4 @@ def format_content(content):
 
 
 if __name__ == "__main__":
-    print(add_user_preferences({}))
-    print(get_user_preferences({}))
-    print(remove_user_preferences({}))
     print(get_stored_paper({}))
