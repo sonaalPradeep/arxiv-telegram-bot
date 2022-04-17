@@ -44,7 +44,7 @@ def main():
     """Start the bot."""
 
     # Create the Updater and pass it your bot's token.
-    persistence = PicklePersistence(filename='arxivTelegramBot')
+    persistence = PicklePersistence(filename="arxivTelegramBot")
     updater = Updater(TOKEN, use_context=True, persistence=persistence)
     dispatcher: Dispatcher = updater.dispatcher
 
