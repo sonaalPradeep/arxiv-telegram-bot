@@ -12,6 +12,7 @@ python-dotenv = "^0.19.2"
 lxml = "^4.7.1"
 beautifulsoup4 = "^4.10.0"
 requests = "^2.27.1"
+urllib3 = "^1.26.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"
