@@ -112,7 +112,6 @@ def updater(context: CallbackContext) -> None:
                     pdf_url = paper['pdf_url']
                     try:
                         message_to_send = f"""
-*New paper added in {category}:{topic}::*\n
 *{title}* `\({categories}\)`\n
 Publication Date: _{date}_\n\n
 {summary}\n
@@ -130,12 +129,6 @@ Publication Date: _{date}_\n\n
                             f"You can access the paper from [this URL]({abs_url})\."
                         )
                         context.bot.send_message(job.context.get('chat_id'), text=failure_message, parse_mode=telegram.ParseMode.MARKDOWN_V2)
-
-
-# def alarm(context: CallbackContext) -> None:
-#     """Send the alarm message."""
-#     job = context.job
-#     context.bot.send_message(job.context, text='Beep!')
 
 
 def remove_job_if_exists(name: str, context: CallbackContext) -> bool:

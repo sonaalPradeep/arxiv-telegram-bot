@@ -46,8 +46,6 @@ def main():
     # Create the Updater and pass it your bot's token.
     persistence = PicklePersistence(filename='arxivTelegramBot')
     updater = Updater(TOKEN, use_context=True, persistence=persistence)
-
-    # updater = Updater(TOKEN, use_context=True)    TODO to be removed
     dispatcher: Dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("test", start))

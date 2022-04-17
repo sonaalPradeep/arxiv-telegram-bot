@@ -13,8 +13,13 @@ import pytz
 import re
 import redis
 import pickle
+import os
+import dotenv
+from urllib.parse import urlparse
 
-r = redis.StrictRedis(host='localhost', port=6379, db=0)  # What is db=0? Clarify before push
+dotenv.load_dotenv()
+url = urlparse(os.environ.get("REDIS_URL"))
+r = redis.StrictRedis(host=url.hostname, port=url.port, username='', password=os.environ.get("PASSWORD"))
 
 
 def add_user(chat_id):
@@ -59,7 +64,7 @@ def store_paper_update(category, topics):
         result = search.results().__next__()
         setTime = datetime.datetime.now()
         setTime = setTime.replace(tzinfo=pytz.utc)
-        setTime = setTime - datetime.timedelta(hours=100)    # TODO hours need to be altered
+        setTime = setTime - datetime.timedelta(hours=12)
         if result.published > setTime:
             paper_dict = {}
 
@@ -87,12 +92,12 @@ def store_paper_update(category, topics):
             try:
                 Category = pickle.loads(r.get(category))
                 Category[topic[1]] = paper_dict
-                # Only supports one paper right now, make it into a list once we confirm that this works
+                # Only support for one paper right now
                 r.set(category, pickle.dumps(Category))
             except:
                 r.delete(category)
                 Category[topic[1]] = paper_dict
-                # Only supports one paper right now, make it into a list once we confirm that this works
+                # Only support for one paper right now
                 r.set(category, pickle.dumps(Category))
 
 
