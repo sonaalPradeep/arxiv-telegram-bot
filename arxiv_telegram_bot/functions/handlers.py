@@ -149,11 +149,10 @@ def schedule(update: Update, context: CallbackContext) -> None:
             update.message.reply_text('We cannot set scheduler, as your preferences are empty')
             return
 
-        # args[0] should contain the time for the timer in seconds
+        # args[0] should contain the number of hours separating daily update time from UTC time
         difference = int(context.args[0])
         updateTime = datetime.datetime.now(tz=pytz.UTC) + datetime.timedelta(hours=difference)
 
-        # datetime.datetime.now() - get_update_time()) >= datetime.timedelta(hours=6)
         if int(updateTime.time().strftime('%H')) >= 24 or int(updateTime.time().strftime('%H')) <=0:
             update.message.reply_text('Sorry, we can\'t update you at that time, please try again!')
             return
@@ -176,7 +175,7 @@ def schedule(update: Update, context: CallbackContext) -> None:
 
 
 def unschedule(update: Update, context: CallbackContext) -> None:
-    """Remove the job if the user changed their mind."""
+    """Remove job if user doesn't want scheduled updates"""
     chat_id = update.message.chat_id
     job_removed = remove_job_if_exists(str(chat_id), context)
     text = 'Timer successfully cancelled!' if job_removed else 'You have no active timer.'

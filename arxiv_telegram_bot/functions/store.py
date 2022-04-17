@@ -19,7 +19,7 @@ from urllib.parse import urlparse
 
 dotenv.load_dotenv()
 url = urlparse(os.environ.get("REDIS_URL"))
-r = redis.StrictRedis(host=url.hostname, port=url.port, username='', password=os.environ.get("PASSWORD"))
+r = redis.StrictRedis(host=url.hostname, port=url.port, username='', password=os.environ.get("REDIS_PASSWORD"))
 
 
 def add_user(chat_id):
