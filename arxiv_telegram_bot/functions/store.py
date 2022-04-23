@@ -11,20 +11,19 @@ import arxiv
 import datetime
 import pytz
 import re
-import redis
 import pickle
 import os
 import dotenv
 from urllib.parse import urlparse
 
 dotenv.load_dotenv()
-url = urlparse(os.environ.get("REDIS_URL"))
-r = redis.StrictRedis(
-    host=url.hostname,
-    port=url.port,
-    username="",
-    password=os.environ.get("REDIS_PASSWORD"),
-)
+# url = urlparse(os.environ.get("REDIS_URL"))
+# r = redis.StrictRedis(
+#     host=url.hostname,
+#     port=url.port,
+#     username="",
+#     password=os.environ.get("REDIS_PASSWORD"),
+# )
 
 
 # def add_user(chat_id):
