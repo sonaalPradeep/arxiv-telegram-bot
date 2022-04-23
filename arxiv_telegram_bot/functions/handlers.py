@@ -82,7 +82,7 @@ Publication Date: _{date}_\n\n
 
 def updater(context: CallbackContext) -> None:
     """Check for new papers in category"""
-    add_user(context.job.context.get("chat_id"))  # Adds user incase missing in DB
+    add_user(context.job.context.get("chat_id"))
 
     catalogue = CategoryHelper()
 
@@ -185,16 +185,16 @@ def schedule(update: Update, context: CallbackContext) -> None:
         variable["chat_id"] = chat_id
 
         job_removed = remove_job_if_exists(str(chat_id) + "job", context)
-        context.job_queue.run_once(
-            updater, int(context.args[0]), context=variable, name=str(chat_id) + "job"
-        )
-        # context.job_queue.run_daily(
-        #     updater,
-        #     time=updateTime.time(),
-        #     days=(0, 1, 2, 3, 4, 5, 6),
-        #     context=chat_id,
-        #     name=str(chat_id) + "job",
+        # context.job_queue.run_once(
+        #     updater, int(context.args[0]), context=variable, name=str(chat_id) + "job"
         # )
+        context.job_queue.run_daily(
+            updater,
+            time=updateTime.time(),
+            days=(0, 1, 2, 3, 4, 5, 6),
+            context=chat_id,
+            name=str(chat_id) + "job",
+        )
 
         text = "Timer successfully set!"
         if job_removed:
