@@ -37,22 +37,25 @@ r = redis.StrictRedis(
 #         users = set([chat_id])
 #         r.set("Users", pickle.dumps(users))
 
+
 def add_user(chat_id):
     """store user chat id"""
 
     try:
-        with open('Users', 'rb+') as pickle_file:
+        with open("Users", "rb+") as pickle_file:
             users = pickle.load(pickle_file)
-        with open('Users', 'wb') as pickle_file:
+        with open("Users", "wb") as pickle_file:
             users.add(chat_id)
             pickle.dump(users, pickle_file)
     except:
         print("File does not exist or stored data format is incorrect")
 
-        with open('Users', 'wb') as pickle_file:
+        with open("Users", "wb") as pickle_file:
             users = set([chat_id])
             pickle.dump(users, pickle_file)
-#todo change except print/ log
+
+
+# todo change except print/ log
 
 
 # def get_users():
@@ -62,15 +65,16 @@ def add_user(chat_id):
 #     else:
 #         return set([])
 
+
 def get_users():
     """get stored user chat ids"""
     try:
-        with open('Users', 'rb+') as pickle_file:
+        with open("Users", "rb+") as pickle_file:
             users = pickle.load(pickle_file)
             return users
     except:
         print("File does not exist or stored data format is incorrect")
-        with open('Users', 'wb') as pickle_file:
+        with open("Users", "wb") as pickle_file:
             users = set([])
             pickle.dump(users, pickle_file)
             return users
@@ -79,12 +83,13 @@ def get_users():
 
 def store_update_time():
     try:
-        with open('Time', 'wb') as pickle_file:
+        with open("Time", "wb") as pickle_file:
             time = datetime.datetime.now()
             pickle.dump(time, pickle_file)
     except:
         print("Something went wrong while storing last updated time")
     # todo change except print/ log
+
 
 # def store_update_time():
 #     r.set("Time", pickle.dumps(datetime.datetime.now()))
@@ -92,7 +97,7 @@ def store_update_time():
 
 def get_update_time():
     try:
-        with open('Time', 'rb+') as pickle_file:
+        with open("Time", "rb+") as pickle_file:
             time = pickle.load(pickle_file)
             return time
     except:
@@ -120,7 +125,7 @@ def store_paper_update(category, topics):
         result = search.results().__next__()
         setTime = datetime.datetime.now()
         setTime = setTime.replace(tzinfo=pytz.utc)
-        setTime = setTime - datetime.timedelta(hours=100)    #todo revert to 12
+        setTime = setTime - datetime.timedelta(hours=100)  # todo revert to 12
         if result.published > setTime:
             paper_dict = {}
 
@@ -146,15 +151,15 @@ def store_paper_update(category, topics):
             paper_dict["pdf_url"] = pdf_url
 
             try:
-                with open(category, 'rb+') as pickle_file:
+                with open(category, "rb+") as pickle_file:
                     Category = pickle.load(pickle_file)
                     Category[topic[1]] = paper_dict
-                with open(category, 'wb') as pickle_file:
+                with open(category, "wb") as pickle_file:
                     pickle.dump(Category, pickle_file)
             except:
                 print("Category did not exits or stored data format is incorrect")
                 # os.remove(category) #todo check if this is removing correctly
-                with open(category, 'wb') as pickle_file:
+                with open(category, "wb") as pickle_file:
                     Category[topic[1]] = paper_dict
                     pickle.dump(Category, pickle_file)
             # todo change except print/ log
@@ -213,7 +218,7 @@ def store_paper_update(category, topics):
 
 def get_stored_paper(category, topicCode):
     try:
-        with open(category, 'rb+') as pickle_file:
+        with open(category, "rb+") as pickle_file:
             Category = pickle.load(pickle_file)
             if topicCode in Category:
                 return Category[topicCode]
