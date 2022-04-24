@@ -13,9 +13,7 @@ import pytz
 import re
 import pickle
 import logging
-import dotenv
 
-# dotenv.load_dotenv()
 
 logger = logging.getLogger(__name__)
 
