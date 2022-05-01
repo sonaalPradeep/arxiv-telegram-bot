@@ -209,7 +209,7 @@ def schedule(update: Update, context: CallbackContext) -> None:
 def unschedule(update: Update, context: CallbackContext) -> None:
     """Remove job if user doesn't want scheduled updates"""
     chat_id = update.message.chat_id
-    job_removed = remove_job_if_exists(str(chat_id), context)
+    job_removed = remove_job_if_exists(str(chat_id) + "job", context)
     text = (
         "Timer successfully cancelled!" if job_removed else "You have no active timer."
     )
