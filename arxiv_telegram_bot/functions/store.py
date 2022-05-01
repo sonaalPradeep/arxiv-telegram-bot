@@ -22,15 +22,15 @@ def add_user(chat_id):
     """store user chat id"""
 
     try:
-        with open("Users", "rb+") as pickle_file:
+        with open("temp/Users", "rb+") as pickle_file:
             users = pickle.load(pickle_file)
-        with open("Users", "wb") as pickle_file:
+        with open("temp/Users", "wb") as pickle_file:
             users.add(chat_id)
             pickle.dump(users, pickle_file)
     except:
         logger.warning("File does not exist or stored data format is incorrect")
 
-        with open("Users", "wb") as pickle_file:
+        with open("temp/Users", "wb") as pickle_file:
             users = set([chat_id])
             pickle.dump(users, pickle_file)
 
@@ -38,12 +38,12 @@ def add_user(chat_id):
 def get_users():
     """get stored user chat ids"""
     try:
-        with open("Users", "rb+") as pickle_file:
+        with open("temp/Users", "rb+") as pickle_file:
             users = pickle.load(pickle_file)
             return users
     except:
         logger.warning("File does not exist or stored data format is incorrect")
-        with open("Users", "wb") as pickle_file:
+        with open("temp/Users", "wb") as pickle_file:
             users = set([])
             pickle.dump(users, pickle_file)
             return users
@@ -51,7 +51,7 @@ def get_users():
 
 def store_update_time():
     try:
-        with open("Time", "wb") as pickle_file:
+        with open("temp/Time", "wb") as pickle_file:
             time = datetime.datetime.now()
             pickle.dump(time, pickle_file)
     except:
@@ -60,7 +60,7 @@ def store_update_time():
 
 def get_update_time():
     try:
-        with open("Time", "rb+") as pickle_file:
+        with open("temp/Time", "rb+") as pickle_file:
             time = pickle.load(pickle_file)
             return time
     except:
@@ -108,23 +108,26 @@ def store_paper_update(category, topics):
             paper_dict["pdf_url"] = pdf_url
 
             try:
-                with open(category, "rb+") as pickle_file:
+                key = f"temp/{category}"
+                with open(key, "rb+") as pickle_file:
                     Category = pickle.load(pickle_file)
                     Category[topic[1]] = paper_dict
-                with open(category, "wb") as pickle_file:
+                with open(key, "wb") as pickle_file:
                     pickle.dump(Category, pickle_file)
             except:
                 logger.warning(
                     "Category did not exits or stored data format is incorrect"
                 )
-                with open(category, "wb") as pickle_file:
+                key = f"temp/{category}"
+                with open(key, "wb") as pickle_file:
                     Category[topic[1]] = paper_dict
                     pickle.dump(Category, pickle_file)
 
 
 def get_stored_paper(category, topicCode):
     try:
-        with open(category, "rb+") as pickle_file:
+        key = f"temp/{category}"
+        with open(key, "rb+") as pickle_file:
             Category = pickle.load(pickle_file)
             if topicCode in Category:
                 return Category[topicCode]
