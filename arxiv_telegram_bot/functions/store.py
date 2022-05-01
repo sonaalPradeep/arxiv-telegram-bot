@@ -10,7 +10,7 @@ Contains all methods related to storing and fetching user data using redis insta
 import datetime
 import logging
 import pickle
-import redis as re
+import redis as r
 
 import arxiv
 import pytz
