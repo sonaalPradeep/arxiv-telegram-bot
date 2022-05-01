@@ -186,7 +186,10 @@ def schedule(update: Update, context: CallbackContext) -> None:
 
         job_removed = remove_job_if_exists(str(chat_id) + "job", context)
         context.job_queue.run_repeating(
-            updater, int(context.args[0])*3600, context=variable, name=str(chat_id) + "job"
+            updater,
+            int(context.args[0]) * 3600,
+            context=variable,
+            name=str(chat_id) + "job",
         )
 
         text = "Timer successfully set!"
