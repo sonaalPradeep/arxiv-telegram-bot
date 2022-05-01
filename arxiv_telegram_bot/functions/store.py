@@ -116,7 +116,7 @@ def store_paper_update(category, topics):
                     pickle.dump(Category, pickle_file)
             except:
                 logger.warning(
-                    "Category did not exits or stored data format is incorrect"
+                    "Category did not exist or stored data format is incorrect"
                 )
                 key = f"temp/{category}"
                 with open(key, "wb") as pickle_file:
