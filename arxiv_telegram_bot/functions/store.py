@@ -7,13 +7,13 @@ Arxiv Telegram Bot - Redis Instance
 Contains all methods related to storing and fetching user data using redis instance
 """
 
-import arxiv
 import datetime
-import pytz
-import re
-import pickle
 import logging
+import pickle
+import redis as re
 
+import arxiv
+import pytz
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +82,7 @@ def store_paper_update(category, topics):
         result = search.results().__next__()
         setTime = datetime.datetime.now()
         setTime = setTime.replace(tzinfo=pytz.utc)
-        setTime = setTime - datetime.timedelta(hours=100)   #todo revert to 12 hours
+        setTime = setTime - datetime.timedelta(hours=100)  # todo revert to 12 hours
         if result.published > setTime:
             paper_dict = {}
 

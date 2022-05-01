@@ -2,7 +2,7 @@
 name = "arxiv-telegram-bot"
 version = "0.1.0"
 description = "A Telegram bot to retrieve information on the latest research papers on Arxiv"
-authors = ["Sonaal Pradeep <unofficial.sonaal@gmail.com>", "Goutham Krishna <gauthamkrishna9991@live.com>"]
+authors = ["Sonaal Pradeep <unofficial.sonaal@gmail.com>", "Goutham Krishna <gauthamkrishna9991@live.com>", "Reuben Roy <reubenroyk@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "3.8.12"
