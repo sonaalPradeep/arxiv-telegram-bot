@@ -188,7 +188,9 @@ def schedule(update: Update, context: CallbackContext) -> None:
         # context.job_queue.run_once(
         #     updater, int(context.args[0]), context=variable, name=str(chat_id) + "job"
         # )
-        context.job_queue.run_repeating(updater, int(context.args[0]), context=variable, name=str(chat_id) + "job")
+        context.job_queue.run_repeating(
+            updater, int(context.args[0]), context=variable, name=str(chat_id) + "job"
+        )
         # context.job_queue.run_daily(
         #     updater,
         #     time=updateTime.time(),
