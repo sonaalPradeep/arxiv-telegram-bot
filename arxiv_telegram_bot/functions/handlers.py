@@ -164,7 +164,6 @@ def schedule(update: Update, context: CallbackContext) -> None:
 
     # update user preferences against redis instance
     get_user_preferences(chat_id, context)
-    # context.user_data["CURRENT_PREFERENCES"] = get_user_preferences(chat_id, context)
 
     try:
         if (
@@ -179,7 +178,7 @@ def schedule(update: Update, context: CallbackContext) -> None:
         # args[0] should contain the number of hours separating daily update time from UTC time
         difference = int(context.args[0])
         updateTime = datetime.datetime.now(tz=pytz.UTC) + datetime.timedelta(
-            hours=difference
+            minutes=difference
         )
 
         if (
