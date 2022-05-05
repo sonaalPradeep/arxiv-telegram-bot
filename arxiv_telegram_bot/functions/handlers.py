@@ -209,7 +209,7 @@ def schedule(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(text)
 
     except (IndexError, ValueError):
-        update.message.reply_text("Usage: /schedule <hours>")
+        update.message.reply_text("Usage: /schedule <minutes>")
 
 
 def unschedule(update: Update, context: CallbackContext) -> None:
