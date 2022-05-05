@@ -112,8 +112,7 @@ def store_paper_update(category, topics):
         result = search.results().__next__()
         setTime = datetime.datetime.now()
         setTime = setTime.replace(tzinfo=pytz.utc)
-        setTime = setTime - datetime.timedelta(hours=100)
-        # setTime = setTime - datetime.timedelta(hours=12)  #todo
+        setTime = setTime - datetime.timedelta(hours=12)
         if result.published > setTime:
             paper_dict = {}
 

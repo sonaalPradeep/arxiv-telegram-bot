@@ -92,8 +92,7 @@ def updater(context: CallbackContext) -> None:
     catalogue = CategoryHelper()
 
     if get_update_time() is not None:
-        if (datetime.datetime.now() - get_update_time()) >= datetime.timedelta(hours=1): #todo
-        # if (datetime.datetime.now() - get_update_time()) >= datetime.timedelta(hours=6):  #todo
+        if (datetime.datetime.now() - get_update_time()) >= datetime.timedelta(hours=6):
             for category, topics in catalogue.name_code_mapping.items():
                 store_paper_update(category, topics)
             store_update_time()
@@ -199,8 +198,7 @@ def schedule(update: Update, context: CallbackContext) -> None:
         job_removed = remove_job_if_exists(str(chat_id) + "job", context)
         context.job_queue.run_repeating(
             updater,
-            # int(context.args[0]) * 3600,  #todo
-            int(context.args[0]),
+            int(context.args[0]) * 3600,
             context=variable,
             name=str(chat_id) + "job",
         )
