@@ -196,9 +196,10 @@ def schedule(update: Update, context: CallbackContext) -> None:
         variable["chat_id"] = chat_id
 
         job_removed = remove_job_if_exists(str(chat_id) + "job", context)
+        # We use minutes, so that bot can be set to not go to sleep
         context.job_queue.run_repeating(
             updater,
-            int(context.args[0]) * 3600,
+            int(context.args[0]) * 60,
             context=variable,
             name=str(chat_id) + "job",
         )
