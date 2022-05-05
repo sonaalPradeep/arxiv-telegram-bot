@@ -14,6 +14,7 @@ import dotenv
 
 from telegram.ext import (
     Updater,
+    MessageHandler,
     CommandHandler,
     Dispatcher,
     PicklePersistence,
