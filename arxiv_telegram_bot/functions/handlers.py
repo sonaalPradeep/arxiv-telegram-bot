@@ -62,7 +62,7 @@ def fetch(update: Update, context: CallbackContext):
     try:
         message_to_send = f"""
 *{title}* `\({categories}\)`\n
-Publication Date : _{date}_\n\n
+Publication Date: _{date}_\n\n
 {summary}\n
 
 [Click here to open the Arxiv page]({abs_url})
