@@ -10,8 +10,6 @@ import datetime
 import logging
 
 import pytz
-import redis
-import pickle
 import telegram
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, TelegramError
 
@@ -166,6 +164,7 @@ def schedule(update: Update, context: CallbackContext) -> None:
     get_user_preferences(chat_id, context)
 
     try:
+        job_removed = remove_job_if_exists(str(chat_id) + "job", context)
         if (
             len(context.user_data) == 0
             or len(context.user_data.get("CURRENT_PREFERENCES")) == 0
@@ -194,7 +193,6 @@ def schedule(update: Update, context: CallbackContext) -> None:
         variable["context"] = context.user_data.get("CURRENT_PREFERENCES")
         variable["chat_id"] = chat_id
 
-        job_removed = remove_job_if_exists(str(chat_id) + "job", context)
         # We use minutes, so that bot can be set to not go to sleep
         context.job_queue.run_repeating(
             updater,
@@ -362,6 +360,9 @@ def preferences_done(update: Update, context: CallbackContext):
 
     if user_preferences is None or len(user_preferences) == 0:
         reply_text = "Ohh... We see that you're preferences are empty"
+        if remove_job_if_exists(str(chat_id) + "job", context):
+            reply_text = f"""{reply_text}\n
+We cannot send you paper updates since preferences are empty"""
     else:
         for category in user_preferences.keys():
             if user_preferences[category]:
