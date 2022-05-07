@@ -11,61 +11,91 @@ import arxiv
 import datetime
 import pytz
 import re
+import redis
 import pickle
+import os
+import dotenv
+from urllib.parse import urlparse
 import logging
 
+from telegram.ext import CallbackContext
 
-logger = logging.getLogger(__name__)
+dotenv.load_dotenv()
+url = urlparse(os.environ.get("REDIS_URL"))
+r = redis.StrictRedis(
+    host=url.hostname,
+    port=url.port,
+    username="",
+    password=os.environ.get("REDIS_PASSWORD"),
+)
 
 
 def add_user(chat_id):
     """store user chat id"""
-
-    try:
-        with open("Users", "rb+") as pickle_file:
-            users = pickle.load(pickle_file)
-        with open("Users", "wb") as pickle_file:
-            users.add(chat_id)
-            pickle.dump(users, pickle_file)
-    except:
-        logger.warning("File does not exist or stored data format is incorrect")
-
-        with open("Users", "wb") as pickle_file:
-            users = set([chat_id])
-            pickle.dump(users, pickle_file)
+    if r.get("Users"):
+        users = pickle.loads(r.get("Users"))
+        users.add(chat_id)
+        r.set("Users", pickle.dumps(users))
+    else:
+        users = set([chat_id])
+        r.set("Users", pickle.dumps(users))
 
 
 def get_users():
     """get stored user chat ids"""
-    try:
-        with open("Users", "rb+") as pickle_file:
-            users = pickle.load(pickle_file)
-            return users
-    except:
-        logger.warning("File does not exist or stored data format is incorrect")
-        with open("Users", "wb") as pickle_file:
-            users = set([])
-            pickle.dump(users, pickle_file)
-            return users
+    if r.get("Users"):
+        return pickle.loads(r.get("Users"))
+    else:
+        return set([])
+
+
+def add_user_preferences(chat_id, category, response):
+    """store/cache chat_id and user_preferences"""
+    if r.get(chat_id):
+        catalogue = pickle.loads(r.get(chat_id))
+        if catalogue.get(category):
+            catalogue[category].add(response)
+        else:
+            catalogue[category] = set([response])
+        r.set(chat_id, pickle.dumps(catalogue))
+    else:
+        catalogue = {category: set([response])}
+        r.set(chat_id, pickle.dumps(catalogue))
+
+    return "User Added"
+
+
+def remove_user_preferences(chat_id, category, response):
+    """remove chat_id and user_preferences"""
+    catalogue = pickle.loads(r.get(chat_id))
+    catalogue[category].remove(response)
+    if catalogue[category]:
+        r.set(chat_id, pickle.dumps(catalogue))
+    else:
+        del catalogue[category]
+        if catalogue:
+            r.set(chat_id, pickle.dumps(catalogue))
+        else:
+            r.delete(chat_id)
+    return "Topic Removed"
+
+
+def get_user_preferences(chat_id, context: CallbackContext):
+    """store/cache chat_id and user_preferences"""
+    if r.get(chat_id):
+        catalogue = pickle.loads(r.get(chat_id))
+        context.user_data["CURRENT_PREFERENCES"] = catalogue
+        return context.user_data["CURRENT_PREFERENCES"]
+    return []
 
 
 def store_update_time():
-    try:
-        with open("Time", "wb") as pickle_file:
-            time = datetime.datetime.now()
-            pickle.dump(time, pickle_file)
-    except:
-        logger.warning("Something went wrong while storing last updated time")
+    r.set("Time", pickle.dumps(datetime.datetime.now()))
 
 
 def get_update_time():
-    try:
-        with open("Time", "rb+") as pickle_file:
-            time = pickle.load(pickle_file)
-            return time
-    except:
-        logger.warning("Time file does not exist, latest papers will be updated now")
-        return None
+    if r.get("Time"):
+        return pickle.loads(r.get("Time"))
 
 
 def store_paper_update(category, topics):
@@ -108,31 +138,24 @@ def store_paper_update(category, topics):
             paper_dict["pdf_url"] = pdf_url
 
             try:
-                with open(category, "rb+") as pickle_file:
-                    Category = pickle.load(pickle_file)
-                    Category[topic[1]] = paper_dict
-                with open(category, "wb") as pickle_file:
-                    pickle.dump(Category, pickle_file)
+                Category = pickle.loads(r.get(category))
+                Category[topic[1]] = paper_dict
+                # Only supports one paper right now
+                r.set(category, pickle.dumps(Category))
             except:
-                logger.warning(
-                    "Category did not exits or stored data format is incorrect"
-                )
-                with open(category, "wb") as pickle_file:
-                    Category[topic[1]] = paper_dict
-                    pickle.dump(Category, pickle_file)
+                r.delete(category)
+                Category[topic[1]] = paper_dict
+                # Only supports one paper right now
+                r.set(category, pickle.dumps(Category))
 
 
 def get_stored_paper(category, topicCode):
-    try:
-        with open(category, "rb+") as pickle_file:
-            Category = pickle.load(pickle_file)
-            if topicCode in Category:
-                return Category[topicCode]
-            else:
-                return None
-    except:
-        logger.warning("Category does not exist or stored data format is incorrect")
-        return None
+    if r.get(category):
+        category = pickle.loads(r.get(category))
+        if topicCode in category:
+            return category[topicCode]
+        else:
+            return None
 
 
 def format_content(content):
@@ -141,4 +164,7 @@ def format_content(content):
 
 
 if __name__ == "__main__":
+    print(add_user_preferences({}))
+    print(get_user_preferences({}))
+    print(remove_user_preferences({}))
     print(get_stored_paper({}))

@@ -10,6 +10,8 @@ import datetime
 import logging
 
 import pytz
+import redis
+import pickle
 import telegram
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, TelegramError
 
@@ -22,6 +24,9 @@ from telegram.ext import (
 
 from arxiv_telegram_bot.functions.fetch import fetch_latest_paper
 from arxiv_telegram_bot.functions.store import (
+    get_user_preferences,
+    remove_user_preferences,
+    add_user_preferences,
     store_paper_update,
     get_stored_paper,
     add_user,
@@ -115,6 +120,7 @@ def updater(context: CallbackContext) -> None:
                     pdf_url = paper["pdf_url"]
                     try:
                         message_to_send = f"""
+*New paper added in {category}:{topic}::*\n
 *{title}* `\({categories}\)`\n
 Publication Date: _{date}_\n\n
 {summary}\n
@@ -155,6 +161,10 @@ def remove_job_if_exists(name: str, context: CallbackContext) -> bool:
 def schedule(update: Update, context: CallbackContext) -> None:
     """Add a job to the queue."""
     chat_id = update.message.chat_id
+
+    # update user preferences against redis instance
+    get_user_preferences(chat_id, context)
+
     try:
         if (
             len(context.user_data) == 0
@@ -168,7 +178,7 @@ def schedule(update: Update, context: CallbackContext) -> None:
         # args[0] should contain the number of hours separating daily update time from UTC time
         difference = int(context.args[0])
         updateTime = datetime.datetime.now(tz=pytz.UTC) + datetime.timedelta(
-            hours=difference
+            minutes=difference
         )
 
         if (
@@ -185,11 +195,11 @@ def schedule(update: Update, context: CallbackContext) -> None:
         variable["chat_id"] = chat_id
 
         job_removed = remove_job_if_exists(str(chat_id) + "job", context)
-        context.job_queue.run_daily(
+        # We use minutes, so that bot can be set to not go to sleep
+        context.job_queue.run_repeating(
             updater,
-            time=updateTime.time(),
-            days=(0, 1, 2, 3, 4, 5, 6),
-            context=chat_id,
+            int(context.args[0]) * 60,
+            context=variable,
             name=str(chat_id) + "job",
         )
 
@@ -199,13 +209,13 @@ def schedule(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(text)
 
     except (IndexError, ValueError):
-        update.message.reply_text("Usage: /schedule <hours>")
+        update.message.reply_text("Usage: /schedule <minutes>")
 
 
 def unschedule(update: Update, context: CallbackContext) -> None:
     """Remove job if user doesn't want scheduled updates"""
     chat_id = update.message.chat_id
-    job_removed = remove_job_if_exists(str(chat_id), context)
+    job_removed = remove_job_if_exists(str(chat_id) + "job", context)
     text = (
         "Timer successfully cancelled!" if job_removed else "You have no active timer."
     )
@@ -217,7 +227,9 @@ def preferences_entry(update: Update, context: CallbackContext):
     preferences_entry is the entry point for the conversation handler
     """
     add_user(update.effective_chat.id)  # Adds user incase missing in DB
+    chat_id = update.message.chat_id
 
+    get_user_preferences(chat_id, context)
     user_preferences = context.user_data.get("CURRENT_PREFERENCES")
 
     if user_preferences is None or len(user_preferences) == 0:
@@ -323,10 +335,12 @@ def pick_topic_again(update: Update, context: CallbackContext):
 
     if response not in context.user_data.get("CURRENT_PREFERENCES").get(category):
         context.user_data["CURRENT_PREFERENCES"][category].add(response)
+        add_user_preferences(update.effective_chat.id, category, response)
         reply_text = f"Added {response} to your preferences"
     else:
         context.user_data["CURRENT_PREFERENCES"][category].remove(response)
-        reply_text = f"Removed {response} to your preferences"
+        remove_user_preferences(update.effective_chat.id, category, response)
+        reply_text = f"Removed {response} from your preferences"
 
         if len(context.user_data["CURRENT_PREFERENCES"][category]) == 0:
             del context.user_data["CURRENT_PREFERENCES"][category]
@@ -342,12 +356,18 @@ def preferences_done(update: Update, context: CallbackContext):
     """
     query = update.callback_query
     query.answer()
+    chat_id = update.effective_chat.id
 
     user_preferences = context.user_data.get("CURRENT_PREFERENCES")
 
     if user_preferences is None or len(user_preferences) == 0:
         reply_text = "Ohh... We see that you're preferences are empty"
     else:
+        for category in user_preferences.keys():
+            if user_preferences[category]:
+                responses = user_preferences[category]
+                for response in responses:
+                    add_user_preferences(chat_id, category, response)
         reply_text = f"Excellent choice! Your preferences now are {user_preferences}"
 
     query.edit_message_text(reply_text)
