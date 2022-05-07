@@ -32,19 +32,19 @@ r = redis.StrictRedis(
 
 def add_user(chat_id):
     """store user chat id"""
-    if r.get('Users'):
-        users = pickle.loads(r.get('Users'))
+    if r.get("Users"):
+        users = pickle.loads(r.get("Users"))
         users.add(chat_id)
-        r.set('Users', pickle.dumps(users))
+        r.set("Users", pickle.dumps(users))
     else:
         users = set([chat_id])
-        r.set('Users', pickle.dumps(users))
+        r.set("Users", pickle.dumps(users))
 
 
 def get_users():
     """get stored user chat ids"""
-    if r.get('Users'):
-        return pickle.loads(r.get('Users'))
+    if r.get("Users"):
+        return pickle.loads(r.get("Users"))
     else:
         return set([])
 
@@ -90,12 +90,12 @@ def get_user_preferences(chat_id, context: CallbackContext):
 
 
 def store_update_time():
-    r.set('Time', pickle.dumps(datetime.datetime.now()))
+    r.set("Time", pickle.dumps(datetime.datetime.now()))
 
 
 def get_update_time():
-    if r.get('Time'):
-        return pickle.loads(r.get('Time'))
+    if r.get("Time"):
+        return pickle.loads(r.get("Time"))
 
 
 def store_paper_update(category, topics):
@@ -117,25 +117,25 @@ def store_paper_update(category, topics):
             paper_dict = {}
 
             title = format_content(result.title)
-            paper_dict['title'] = title
+            paper_dict["title"] = title
 
             date = format_content(str(result.published).split()[0])
-            paper_dict['date'] = date
+            paper_dict["date"] = date
 
             summary = format_content(result.summary)
             summary = summary.replace("\n", " ")
-            paper_dict['summary'] = summary
+            paper_dict["summary"] = summary
 
             categories = format_content(", ".join(result.categories))
-            paper_dict['categories'] = categories
+            paper_dict["categories"] = categories
 
             abs_url = [str(link) for link in result.links if "abs" in str(link)][0]
             abs_url = format_content(re.sub(r"v\d+\b", "", abs_url))
-            paper_dict['abs_url'] = abs_url
+            paper_dict["abs_url"] = abs_url
 
             pdf_url = [str(link) for link in result.links if "pdf" in str(link)][0]
             pdf_url = format_content(re.sub(r"v\d+\b", "", pdf_url))
-            paper_dict['pdf_url'] = pdf_url
+            paper_dict["pdf_url"] = pdf_url
 
             try:
                 Category = pickle.loads(r.get(category))
