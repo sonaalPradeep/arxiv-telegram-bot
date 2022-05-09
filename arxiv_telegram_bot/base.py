@@ -14,8 +14,10 @@ import dotenv
 
 from telegram.ext import (
     Updater,
+    MessageHandler,
     CommandHandler,
     Dispatcher,
+    PicklePersistence,
 )
 
 from arxiv_telegram_bot.functions.handlers import (
@@ -23,6 +25,8 @@ from arxiv_telegram_bot.functions.handlers import (
     fetch,
     preference_conversation_handler,
     error,
+    schedule,
+    unschedule,
 )
 
 
@@ -40,12 +44,16 @@ HEROKU_URL = os.environ.get("HEROKU_URL")
 def main():
     """Start the bot."""
 
-    updater = Updater(TOKEN, use_context=True)
+    # Create the Updater and pass it your bot's token.
+    persistence = PicklePersistence(filename="/tmp/arxivTelegramBot")
+    updater = Updater(TOKEN, use_context=True, persistence=persistence)
     dispatcher: Dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("test", start))
     dispatcher.add_handler(CommandHandler("latest", fetch))
     dispatcher.add_handler(preference_conversation_handler())
+    dispatcher.add_handler(CommandHandler("schedule", schedule))
+    dispatcher.add_handler(CommandHandler("unschedule", unschedule))
     dispatcher.add_error_handler(error)
 
     if os.environ.get("ENV") == "HEROKU":
