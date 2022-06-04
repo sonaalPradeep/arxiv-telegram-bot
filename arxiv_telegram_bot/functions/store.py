@@ -30,7 +30,7 @@ if os.environ.get("ENV") == "HEROKU":
     )
 else:
     r = redis.StrictRedis(
-        host='localhost',
+        host="localhost",
         port=6379,
         db=0,
     )
@@ -118,7 +118,9 @@ def store_paper_update(category, topics):
         result = search.results().__next__()
         setTime = datetime.datetime.now()
         setTime = setTime.replace(tzinfo=pytz.utc)
-        setTime = setTime - datetime.timedelta(hours=int(os.environ.get("CONFIG_UPDATE_TIMEDELTA")))
+        setTime = setTime - datetime.timedelta(
+            hours=int(os.environ.get("CONFIG_UPDATE_TIMEDELTA"))
+        )
         if result.published > setTime:
             paper_dict = {}
 

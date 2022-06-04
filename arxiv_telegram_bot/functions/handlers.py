@@ -91,7 +91,9 @@ def updater(context: CallbackContext) -> None:
     catalogue = CategoryHelper()
 
     if get_update_time() is not None:
-        if (datetime.datetime.now() - get_update_time()) >= datetime.timedelta(minutes=int(os.environ.get("CONFIG_UPDATE_FREQUENCY_MINS"))):
+        if (datetime.datetime.now() - get_update_time()) >= datetime.timedelta(
+            minutes=int(os.environ.get("CONFIG_UPDATE_FREQUENCY_MINS"))
+        ):
             for category, topics in catalogue.name_code_mapping.items():
                 store_paper_update(category, topics)
             store_update_time()
