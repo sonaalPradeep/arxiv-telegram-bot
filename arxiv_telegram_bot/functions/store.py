@@ -16,18 +16,24 @@ import pickle
 import os
 import dotenv
 from urllib.parse import urlparse
-import logging
 
 from telegram.ext import CallbackContext
 
 dotenv.load_dotenv()
-url = urlparse(os.environ.get("REDIS_URL"))
-r = redis.StrictRedis(
-    host=url.hostname,
-    port=url.port,
-    username="",
-    password=os.environ.get("REDIS_PASSWORD"),
-)
+if os.environ.get("ENV") == "HEROKU":
+    url = urlparse(os.environ.get("REDIS_URL"))
+    r = redis.StrictRedis(
+        host=url.hostname,
+        port=url.port,
+        username="",
+        password=os.environ.get("REDIS_PASSWORD"),
+    )
+else:
+    r = redis.StrictRedis(
+        host='localhost',
+        port=6379,
+        db=0,
+    )
 
 
 def add_user(chat_id):
@@ -112,7 +118,7 @@ def store_paper_update(category, topics):
         result = search.results().__next__()
         setTime = datetime.datetime.now()
         setTime = setTime.replace(tzinfo=pytz.utc)
-        setTime = setTime - datetime.timedelta(hours=12)
+        setTime = setTime - datetime.timedelta(hours=int(os.environ.get("CONFIG_UPDATE_TIMEDELTA")))
         if result.published > setTime:
             paper_dict = {}
 
